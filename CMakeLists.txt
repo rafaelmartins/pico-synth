@@ -10,6 +10,7 @@ add_executable(pico-synth
     main.c
     usb.c
     note.c
+    phase.c
     waveform.c
     oscillator.c
     controller.c

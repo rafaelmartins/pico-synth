@@ -149,7 +149,7 @@ names = [
 ]
 
 cpufreq = 133000000
-cycles_per_sample = 34 * 2
+cycles_per_sample = 34
 samples_per_second = 96000
 
 
@@ -159,31 +159,34 @@ def note_to_string(note):
     return '%s%d' % (name, oct)
 
 
+def get_div():
+    return cpufreq / (samples_per_second * cycles_per_sample)
+
+
 def get_step(f):
-    v = samples_per_second / f
-    if v > 0x2000:
-        return 1, 0x2000
-    st = 0x2000 // v
-    return st, (0x2000 // st) * st
+    return 0x2000 / (samples_per_second / f)
+
 
 def generate():
+    div = get_div()
     yield '#pragma once'
     yield ''
     yield '#include <note.h>'
+    yield ''
+    yield 'static const float note_clkdiv = %f;' % div
     yield ''
     yield 'static const note_t notes[] = {'
 
     for i, f in enumerate(freqs):
         name = note_to_string(i)
-        step, end = get_step(f)
-        div = cpufreq / (cycles_per_sample * ((end // step) + 1) * f)
+        step = get_step(f)
         yield '    {'
-        yield '        .id = %d,' % i
+        yield '        .id   = %d,' % i
         yield '        .name = "%s",' % name
-        yield '        .step = %d,' % int(step)
-        yield '        .end = %d,' % int(end)
-        yield '        .div_int = %d,' % int(div)
-        yield '        .div_frac = %d,' % int((div - float(int(div))) * (1 << 8))
+        yield '        .step = {'
+        yield '            .pint  = %d,' % int(step)
+        yield '            .pfrac = %d,' % int((step - float(int(step))) * (1 << 16))
+        yield '        },'
         yield '    },'
 
     yield '};'
