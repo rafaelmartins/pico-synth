@@ -10,4 +10,4 @@ typedef enum {
     WAVEFORM_SAW_LEFT,
 } waveform_type_t;
 
-uint16_t waveform_get_sample(waveform_type_t type, uint16_t phase);
+int16_t waveform_get_sample(waveform_type_t type, uint16_t phase);

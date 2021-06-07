@@ -50,7 +50,7 @@ oscillator_note_off(oscillator_t *osc)
 }
 
 
-uint16_t
+int16_t
 oscillator_sample_callback(void *data)
 {
     if (data == NULL)
@@ -59,9 +59,14 @@ oscillator_sample_callback(void *data)
     oscillator_t *osc = data;
 
     mutex_enter_blocking(&osc->mtx);
-    uint16_t sample = waveform_get_sample(osc->wf, phase_get_index(&osc->phase));
-    if (osc->note != NULL)
+    int16_t sample = 0;
+    if (osc->note != NULL) {
+        sample = waveform_get_sample(osc->wf, phase_get_index(&osc->phase));
         phase_step(&osc->phase, &osc->note->step);
+    }
+    else {
+        phase_reset(&osc->phase);
+    }
     mutex_exit(&osc->mtx);
 
     return sample;

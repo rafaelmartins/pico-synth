@@ -4,7 +4,9 @@
 #include <hardware/pio.h>
 #include <pico/mutex.h>
 
-typedef uint16_t (*mcp4822_sample_cb_t)(void *data);
+#define mcp4822_offset 0x0800
+
+typedef int16_t (*mcp4822_sample_cb_t)(void *data);
 
 typedef enum {
     MCP4822_DAC_A,
@@ -22,7 +24,7 @@ typedef struct {
     mutex_t mtx;
     mcp4822_sample_cb_t cb[2];
     void *cb_data[2];
-    uint16_t data[2];
+    int16_t data[2];
     bool resend;
 } mcp4822_t;
 
