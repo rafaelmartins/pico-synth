@@ -2,7 +2,8 @@
 
 #include <note.h>
 
-static const float note_clkdiv = 40.747549;
+#define note_clkdiv 40.747549
+#define note_last 127
 
 static const note_t notes[] = {
     {

@@ -173,7 +173,8 @@ def generate():
     yield ''
     yield '#include <note.h>'
     yield ''
-    yield 'static const float note_clkdiv = %f;' % div
+    yield '#define note_clkdiv %f' % div
+    yield '#define note_last %d' % (len(freqs) - 1)
     yield ''
     yield 'static const note_t notes[] = {'
 

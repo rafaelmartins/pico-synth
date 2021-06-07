@@ -6,7 +6,7 @@
 const note_t*
 note_get(uint8_t note)
 {
-    if (note >= 128)
+    if (note > note_last)
         return NULL;
     return &notes[note];
 }
