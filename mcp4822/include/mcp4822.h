@@ -4,6 +4,10 @@
 #include <hardware/pio.h>
 #include <pico/mutex.h>
 
+#define mcp4822_min_int -0x0800
+#define mcp4822_max_int  0x07ff
+#define mcp4822_min_uint 0
+#define mcp4822_max_uint 0x0fff
 #define mcp4822_offset 0x0800
 
 typedef int16_t (*mcp4822_sample_cb_t)(void *data);
