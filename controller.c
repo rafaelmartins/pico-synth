@@ -109,7 +109,7 @@ controller_midi_task(void)
     if (!tud_midi_available())
         return;
 
-    uint32_t count = tud_midi_read(midi_buf, sizeof(midi_buf));
+    uint32_t count = tud_midi_stream_read(midi_buf, sizeof(midi_buf));
 
     bool off = (count >= 2) && ((midi_buf[0] >> 4) == 0x8);
     bool on  = (count >= 3) && ((midi_buf[0] >> 4) == 0x9);
