@@ -21,6 +21,7 @@ target_link_libraries(pico-synth PRIVATE
     hardware_pio
     pico_stdlib
     pico_multicore
+    pico_unique_id
     tinyusb_device
     mcp4822
     ssd1306

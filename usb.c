@@ -1,3 +1,5 @@
+#include <pico/stdlib.h>
+#include <pico/unique_id.h>
 #include <tusb.h>
 #include <controller.h>
 
@@ -44,7 +46,7 @@ tud_descriptor_configuration_cb(uint8_t index)
 static const uint16_t lang[] = {_DESCRIPTION_HEADER(1), 0x0409};
 static const uint16_t manufacturer[] = {_DESCRIPTION_HEADER(6), 'r', 'g', 'm', '.', 'i', 'o'};
 static const uint16_t product[] = {_DESCRIPTION_HEADER(10), 'p', 'i', 'c', 'o', '-', 's', 'y', 'n', 't', 'h'};
-static const uint16_t serial[] = {_DESCRIPTION_HEADER(6), '1', '2', '3', '4', '5', '6'};
+static uint16_t serial[PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2 + 1] = {_DESCRIPTION_HEADER(PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2)};
 #undef _DESCRIPTION_HEADER
 
 const uint16_t*
@@ -58,6 +60,12 @@ tud_descriptor_string_cb(uint8_t index, uint16_t langid)
         case 2:
             return product;
         case 3:
+            if (serial[1] == 0) {
+                char serial_str[PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2 + 1];
+                pico_get_unique_board_id_string(serial_str, sizeof(serial_str));
+                for (size_t i = 0; serial_str[i] != 0; i++)
+                    serial[i + 1] = serial_str[i];
+            }
             return serial;
     }
 
