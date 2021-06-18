@@ -1,8 +1,8 @@
 #include <string.h>
 #include <pico/assert.h>
 #include <tusb.h>
+#include <oled-tui.h>
 #include <oscillator.h>
-#include <ssd1306.h>
 #include <controller.h>
 
 #define assert_channel(c) hard_assert(c >= CHANNEL_1 && c < _NUM_CHANNELS)
@@ -22,20 +22,19 @@ struct channel {
 
 static struct channel channels[_NUM_CHANNELS];
 static char midi_buf[64];
-static ssd1306_t *display = NULL;
+static oled_tui_t *tui = NULL;
 
 
 static void
-display_render(void)
+render(void)
 {
-    hard_assert(display);
+    hard_assert(tui);
 
-    ssd1306_clear(display);
-    ssd1306_add_string_line(display, 0, "Pico Synth", SSD1306_LINE_ALIGN_CENTER);
+    oled_tui_clear(tui);
+    oled_tui_line(tui, 0, "Pico Synth", OLED_TUI_HALIGN_CENTER);
     for (size_t i = 0; i < _NUM_CHANNELS; i++)
-        ssd1306_add_string_line(display, 3 + (2 * i), channels[i].str,
-            SSD1306_LINE_ALIGN_LEFT);
-    ssd1306_render(display);
+        oled_tui_line(tui, 3 + (2 * i), channels[i].str, OLED_TUI_HALIGN_LEFT);
+    oled_tui_render(tui);
 }
 
 
@@ -61,11 +60,11 @@ set_midi_channel(channel_t c, uint8_t midi_channel)
 
 
 void
-controller_init(ssd1306_t *disp, oscillator_t *osc1, oscillator_t *osc2, oscillator_t *osc3)
+controller_init(oled_tui_t *t, oscillator_t *osc1, oscillator_t *osc2, oscillator_t *osc3)
 {
-    hard_assert(!display);
+    hard_assert(!tui);
 
-    display = disp;
+    tui = t;
 
     channels[0].osc = osc1;
     channels[1].osc = osc2;
@@ -77,7 +76,7 @@ controller_init(ssd1306_t *disp, oscillator_t *osc1, oscillator_t *osc2, oscilla
         set_midi_channel(i, i);
     }
 
-    display_render();
+    render();
 }
 
 
@@ -91,7 +90,7 @@ note_on(channel_t c, uint8_t note)
 
     oscillator_note_on(channels[c].osc, note);
     strncpy(channels[c].str + 16, channels[c].osc->note->name, sizeof(channels[c].str) - 16);
-    display_render();
+    render();
 }
 
 
@@ -105,7 +104,7 @@ note_off(channel_t c)
 
     oscillator_note_off(channels[c].osc);
     strncpy(channels[c].str + 16, "                ", sizeof(channels[c].str) - 16);
-    display_render();
+    render();
 }
 
 
@@ -153,7 +152,7 @@ controller_usb_request_cb(uint8_t cmd, bool write, uint16_t val, uint16_t idx, u
             }
 
             set_midi_channel(idx, val);
-            display_render();
+            render();
             break;
         }
     }

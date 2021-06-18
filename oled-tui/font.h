@@ -34,10 +34,6 @@
 
 #pragma once
 
-#define FONT_NUM_CHARS 255
-#define FONT_WIDTH 5
-#define FONT_HEIGHT 7
-
 static const uint8_t font_bitmaps[] =
 {
     /* @0 '\x0' (5 pixels wide) */

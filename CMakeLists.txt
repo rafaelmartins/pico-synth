@@ -24,7 +24,7 @@ target_link_libraries(pico-synth PRIVATE
     pico_unique_id
     tinyusb_device
     mcp4822
-    ssd1306
+    oled_tui
 )
 
 target_include_directories(pico-synth PRIVATE
@@ -39,4 +39,4 @@ target_compile_definitions(tinyusb_device INTERFACE
 pico_enable_stdio_uart(pico-synth 1)
 
 add_subdirectory(mcp4822)
-add_subdirectory(ssd1306)
+add_subdirectory(oled-tui)

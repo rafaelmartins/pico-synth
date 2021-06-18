@@ -3,7 +3,7 @@
 #include <pico/stdlib.h>
 #include <tusb.h>
 #include <mcp4822.h>
-#include <ssd1306.h>
+#include <oled-tui.h>
 #include <controller.h>
 #include <oscillator.h>
 #include <data/notes.h>
@@ -20,8 +20,9 @@ static oscillator_t osc = {
     .id = 0,
 };
 
-static ssd1306_t display = {
-    .i2c = i2c0,
+static oled_tui_t tui = {
+    .i2c = i2c1,
+    .oled_controller = OLED_TUI_SH1106,
 };
 
 
@@ -40,7 +41,7 @@ main() {
     stdio_init_all();
     tusb_init();
 
-    i2c_init(i2c0, 400000);
+    i2c_init(i2c1, 400000);
     gpio_set_function(2, GPIO_FUNC_I2C);
     gpio_set_function(3, GPIO_FUNC_I2C);
     gpio_pull_up(2);
@@ -52,9 +53,9 @@ main() {
     mcp4822_set_cb_data(&dac, MCP4822_DAC_A, &osc);
     mcp4822_set_cb(&dac, MCP4822_DAC_A, oscillator_sample_callback);
 
-    ssd1306_init(&display);
+    oled_tui_init(&tui);
 
-    controller_init(&display, &osc, NULL, NULL);
+    controller_init(&tui, &osc, NULL, NULL);
 
     multicore_launch_core1(main_core1);
 
