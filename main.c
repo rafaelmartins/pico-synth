@@ -8,40 +8,16 @@
 #include <oscillator.h>
 #include <data/notes.h>
 
-static mcp4822_t dac1 = {
+static mcp4822_t dac = {
     .pio = pio0,
     .sm = 0,
-    .basepin = 2,
+    .basepin = 6,
     .clkdiv = note_clkdiv,
     .dual = false,
 };
 
-static mcp4822_t dac2 = {
-    .pio = pio0,
-    .sm = 1,
-    .basepin = 5,
-    .clkdiv = note_clkdiv,
-    .dual = false,
-};
-
-static mcp4822_t dac3 = {
-    .pio = pio0,
-    .sm = 2,
-    .basepin = 18,
-    .clkdiv = note_clkdiv,
-    .dual = false,
-};
-
-static oscillator_t osc1 = {
+static oscillator_t osc = {
     .id = 0,
-};
-
-static oscillator_t osc2 = {
-    .id = 1,
-};
-
-static oscillator_t osc3 = {
-    .id = 2,
 };
 
 static ssd1306_t display = {
@@ -52,9 +28,7 @@ static ssd1306_t display = {
 void
 main_core1() {
     while (true) {
-        mcp4822_update(&dac1);
-        mcp4822_update(&dac2);
-        mcp4822_update(&dac3);
+        mcp4822_update(&dac);
     }
 }
 
@@ -66,31 +40,21 @@ main() {
     stdio_init_all();
     tusb_init();
 
-    i2c_init(i2c0, 200000);
-    gpio_set_function(8, GPIO_FUNC_I2C);
-    gpio_set_function(9, GPIO_FUNC_I2C);
-    gpio_pull_up(8);
-    gpio_pull_up(9);
+    i2c_init(i2c0, 400000);
+    gpio_set_function(2, GPIO_FUNC_I2C);
+    gpio_set_function(3, GPIO_FUNC_I2C);
+    gpio_pull_up(2);
+    gpio_pull_up(3);
 
-    mcp4822_init(&dac1);
-    mcp4822_init(&dac2);
-    mcp4822_init(&dac3);
+    mcp4822_init(&dac);
 
-    oscillator_init(&osc1);
-    mcp4822_set_cb_data(&dac1, MCP4822_DAC_A, &osc1);
-    mcp4822_set_cb(&dac1, MCP4822_DAC_A, oscillator_sample_callback);
-
-    oscillator_init(&osc2);
-    mcp4822_set_cb_data(&dac2, MCP4822_DAC_A, &osc2);
-    mcp4822_set_cb(&dac2, MCP4822_DAC_A, oscillator_sample_callback);
-
-    oscillator_init(&osc3);
-    mcp4822_set_cb_data(&dac3, MCP4822_DAC_A, &osc3);
-    mcp4822_set_cb(&dac3, MCP4822_DAC_A, oscillator_sample_callback);
+    oscillator_init(&osc);
+    mcp4822_set_cb_data(&dac, MCP4822_DAC_A, &osc);
+    mcp4822_set_cb(&dac, MCP4822_DAC_A, oscillator_sample_callback);
 
     ssd1306_init(&display);
 
-    controller_init(&display, &osc1, &osc2, &osc3);
+    controller_init(&display, &osc, NULL, NULL);
 
     multicore_launch_core1(main_core1);
 

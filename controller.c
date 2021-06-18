@@ -86,6 +86,9 @@ note_on(channel_t c, uint8_t note)
 {
     assert_channel(c);
 
+    if (channels[c].osc == NULL)
+        return;
+
     oscillator_note_on(channels[c].osc, note);
     strncpy(channels[c].str + 16, channels[c].osc->note->name, sizeof(channels[c].str) - 16);
     display_render();
@@ -96,6 +99,9 @@ static void
 note_off(channel_t c)
 {
     assert_channel(c);
+
+    if (channels[c].osc == NULL)
+        return;
 
     oscillator_note_off(channels[c].osc);
     strncpy(channels[c].str + 16, "                ", sizeof(channels[c].str) - 16);
