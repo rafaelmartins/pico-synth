@@ -91,13 +91,18 @@ call_callback(midi_t *m)
         case MIDI_COMMAND_PITCH_BEND:
             if (m->cb_channel == NULL)
                 return;
-            return m->cb_channel(m->last_status >> 4, m->last_status & 0xf,
+            m->cb_channel(m->last_status >> 4, m->last_status & 0xf,
                 m->data, m->data_idx);
+            break;
         case MIDI_COMMAND_SYSTEM:
             if (m->cb_system == NULL)
                 return;
-            return m->cb_system(m->last_status & 0xf, m->data, m->data_idx);
+            m->cb_system(m->last_status & 0xf, m->data, m->data_idx);
+            break;
     }
+
+    memset(m->data, 0, sizeof(m->data));
+    m->data_idx = 0;
 }
 
 
