@@ -26,6 +26,7 @@ target_link_libraries(pico-synth PRIVATE
     ec11
     mcp4822
     oled_tui
+    midi
 )
 
 target_include_directories(pico-synth PRIVATE
@@ -41,4 +42,5 @@ pico_enable_stdio_uart(pico-synth 1)
 
 add_subdirectory(ec11)
 add_subdirectory(mcp4822)
+add_subdirectory(midi)
 add_subdirectory(oled-tui)
