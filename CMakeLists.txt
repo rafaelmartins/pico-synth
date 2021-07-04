@@ -24,6 +24,7 @@ target_link_libraries(pico-synth PRIVATE
     pico_unique_id
     tinyusb_device
     ec11
+    eeprom_i2c
     mcp4822
     oled_tui
     midi
@@ -41,6 +42,7 @@ target_compile_definitions(tinyusb_device INTERFACE
 pico_enable_stdio_uart(pico-synth 1)
 
 add_subdirectory(ec11)
+add_subdirectory(eeprom-i2c)
 add_subdirectory(mcp4822)
 add_subdirectory(midi)
 add_subdirectory(oled-tui)
