@@ -95,14 +95,14 @@ note_on(channel_t c, uint8_t note)
 
 
 static void
-note_off(channel_t c)
+note_off(channel_t c, uint8_t note)
 {
     assert_channel(c);
 
     if (channels[c].osc == NULL)
         return;
 
-    oscillator_note_off(channels[c].osc);
+    oscillator_note_off(channels[c].osc, note);
     strncpy(channels[c].str + 16, "                ", sizeof(channels[c].str) - 16);
     render();
 }
@@ -126,7 +126,7 @@ controller_midi_task(void)
     for (size_t i = 0; i < _NUM_CHANNELS; i++) {
         if (channels[i].midi_channel != 0xff && channels[i].midi_channel == chan) {
             if (off || (on && midi_buf[2] == 0))
-                note_off(i);
+                note_off(i, midi_buf[1]);
             else if (on)
                 note_on(i, midi_buf[1]);
         }

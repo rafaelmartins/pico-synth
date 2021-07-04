@@ -16,9 +16,7 @@ static mcp4822_t dac = {
     .dual = false,
 };
 
-static oscillator_t osc = {
-    .id = 0,
-};
+static oscillator_t osc;
 
 static oled_tui_t tui = {
     .i2c = i2c1,
@@ -51,7 +49,7 @@ main() {
 
     oscillator_init(&osc);
     mcp4822_set_cb_data(&dac, MCP4822_DAC_A, &osc);
-    mcp4822_set_cb(&dac, MCP4822_DAC_A, oscillator_sample_callback);
+    mcp4822_set_cb(&dac, MCP4822_DAC_A, (mcp4822_sample_cb_t) oscillator_next_sample);
 
     oled_tui_init(&tui);
 
