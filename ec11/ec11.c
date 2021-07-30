@@ -80,29 +80,6 @@ rotate_task(ec11_t *p)
 
     switch (p->rotate_state) {
         case EC11_STATE_INITIAL:
-            break;
-
-        case EC11_STATE_FIRST_CW:
-        case EC11_STATE_FIRST_CCW:
-        case EC11_STATE_SECOND_CW:
-        case EC11_STATE_SECOND_CCW:
-            if (a && b)
-                p->rotate_state = EC11_STATE_INITIAL;
-            break;
-
-        case EC11_STATE_CW:
-            if (!b)
-                p->rotate_state = EC11_STATE_INITIAL;
-            break;
-
-        case EC11_STATE_CCW:
-            if (!a)
-                p->rotate_state = EC11_STATE_INITIAL;
-            break;
-    }
-
-    switch (p->rotate_state) {
-        case EC11_STATE_INITIAL:
             if (!a)
                 p->rotate_state = EC11_STATE_FIRST_CW;
             else if (!b)
@@ -110,34 +87,46 @@ rotate_task(ec11_t *p)
             break;
 
         case EC11_STATE_FIRST_CW:
-            if ((!a) && (!b))
+            if (a && b)
+                p->rotate_state = EC11_STATE_INITIAL;
+            else if (!(a || b))
                 p->rotate_state = EC11_STATE_SECOND_CW;
             break;
 
         case EC11_STATE_FIRST_CCW:
-            if ((!a) && (!b))
+            if (a && b)
+                p->rotate_state = EC11_STATE_INITIAL;
+            else if (!(a || b))
                 p->rotate_state = EC11_STATE_SECOND_CCW;
             break;
 
         case EC11_STATE_SECOND_CW:
-            if (!b)
+            if (a && b)
+                p->rotate_state = EC11_STATE_INITIAL;
+            else if (!b)
                 p->rotate_state = EC11_STATE_CW;
             break;
 
         case EC11_STATE_SECOND_CCW:
-            if (!a)
+            if (a && b)
+                p->rotate_state = EC11_STATE_INITIAL;
+            else if (!a)
                 p->rotate_state = EC11_STATE_CCW;
             break;
 
         case EC11_STATE_CW:
-            if (a && b) {
+            if (!b)
+                p->rotate_state = EC11_STATE_INITIAL;
+            else if (a && b) {
                 call_callback(p, EC11_CALLBACK_ROTATE_CW);
                 p->rotate_state = EC11_STATE_INITIAL;
             }
             break;
 
         case EC11_STATE_CCW:
-            if (a && b) {
+            if (!a)
+                p->rotate_state = EC11_STATE_INITIAL;
+            else if (a && b) {
                 call_callback(p, EC11_CALLBACK_ROTATE_CCW);
                 p->rotate_state = EC11_STATE_INITIAL;
             }
