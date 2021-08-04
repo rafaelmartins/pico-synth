@@ -88,15 +88,28 @@ oled_tui_init(oled_tui_t *s)
 }
 
 
+int
+oled_tui_clear_line(oled_tui_t *s, uint8_t line)
+{
+    hard_assert(s);
+
+    if (line >= MAX_LINES)
+        return PICO_ERROR_GENERIC;
+
+    memset(s->_ram_pages[line].data + 1, 0, sizeof(s->_ram_pages[line].data - 1));
+    s->_ram_pages[line].rendered = false;
+
+    return PICO_OK;
+}
+
+
 void
 oled_tui_clear(oled_tui_t *s)
 {
     hard_assert(s);
 
-    for (size_t i = 0; i < RAM_PAGES; i++) {
-        memset(s->_ram_pages[i].data + 1, 0, sizeof(s->_ram_pages[i].data - 1));
-        s->_ram_pages[i].rendered = false;
-    }
+    for (uint8_t i = 0; i < RAM_PAGES; i++)
+        oled_tui_clear_line(s, i);
 }
 
 
