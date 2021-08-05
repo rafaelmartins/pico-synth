@@ -19,6 +19,10 @@ eeprom_i2c_init(eeprom_i2c_t *m)
         case EEPROM_I2C_24LC256:
             m->page_size = 64;
             break;
+
+        case EEPROM_I2C_24LC512:
+            m->page_size = 128;
+            break;
     }
 
     return m->page_size == 0 ? PICO_ERROR_GENERIC : PICO_OK;  // FIXME

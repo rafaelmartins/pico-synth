@@ -7,6 +7,7 @@ typedef struct {
     uint8_t i2c_address;
     enum {
         EEPROM_I2C_24LC256 = 1,
+        EEPROM_I2C_24LC512,
     } ic;
 
     // private
