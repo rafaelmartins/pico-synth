@@ -13,7 +13,7 @@ add_executable(pico-synth
     phase.c
     waveform.c
     oscillator.c
-    controller.c
+    synth.c
 )
 
 target_link_libraries(pico-synth PRIVATE

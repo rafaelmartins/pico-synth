@@ -1,38 +1,70 @@
 #include <hardware/i2c.h>
 #include <pico/multicore.h>
-#include <pico/stdlib.h>
 #include <tusb.h>
-#include <mcp4822.h>
-#include <oled-tui.h>
-#include <controller.h>
-#include <oscillator.h>
+#include <synth.h>
 #include <data/notes.h>
 
-static mcp4822_t dac = {
-    .pio = pio0,
-    .sm = 0,
-    .basepin = 6,
-    .clkdiv = note_clkdiv,
-    .dual = false,
-};
+static synth_t synth = {
+    .dac = {
+        .pio = pio0,
+        .sm = 0,
+        .basepin = 6,
+        .clkdiv = note_clkdiv,
+        .dual = true,
+    },
 
-static oscillator_t osc;
+    .eeprom = {
+        .i2c = i2c1,
+        .ic = EEPROM_I2C_24LC512,
+    },
 
-static oled_tui_t tui = {
-    .i2c = i2c1,
-    .oled_controller = OLED_TUI_SH1106,
+    .encoder = {
+        .button = 9,
+        .a = 10,
+        .b = 11,
+        .button_debounce_us = 250000,
+        .rotate_debounce_us = 2000,
+    },
+
+    .tui = {
+        .i2c = i2c1,
+        .oled_controller = OLED_TUI_SH1106,
+    },
+
+    .oscillators = {
+        {
+            .channel = MCP4822_DAC_A,
+            .midi_channel = 0,
+        },
+        {
+            .channel = MCP4822_DAC_A,
+            .midi_channel = 1,
+        },
+        {
+            .channel = MCP4822_DAC_A,
+            .midi_channel = 2,
+        },
+        {
+            .channel = MCP4822_DAC_B,
+            .midi_channel = 3,
+        },
+        {
+            .channel = MCP4822_DAC_B,
+            .midi_channel = 4,
+        },
+        {
+            .channel = MCP4822_DAC_B,
+            .midi_channel = 5,
+        },
+    },
+
+    .midi = {
+        .uart = uart1,
+    },
 };
 
 
 void
-main_core1() {
-    while (true) {
-        mcp4822_update(&dac);
-    }
-}
-
-
-int
 main() {
     set_sys_clock_khz(133000, true);
 
@@ -45,20 +77,16 @@ main() {
     gpio_pull_up(2);
     gpio_pull_up(3);
 
-    mcp4822_init(&dac);
+    uart_init(uart1, 31250);
+    gpio_set_function(5, GPIO_FUNC_UART);
+    gpio_pull_up(5);
 
-    oscillator_init(&osc);
-    mcp4822_set_cb_data(&dac, MCP4822_DAC_A, &osc);
-    mcp4822_set_cb(&dac, MCP4822_DAC_A, (mcp4822_sample_cb_t) oscillator_next_sample);
+    hard_assert(synth_init(&synth) == PICO_OK);
 
-    oled_tui_init(&tui);
-
-    controller_init(&tui, &osc, NULL, NULL);
-
-    multicore_launch_core1(main_core1);
+    multicore_launch_core1(synth_core1);
 
     while (1) {
         tud_task();
-        controller_midi_task();
+        synth_task();
     }
 }

@@ -10,12 +10,12 @@
 #define mcp4822_max_uint 0x0fff
 #define mcp4822_offset 0x0800
 
-typedef int16_t (*mcp4822_sample_cb_t)(void *data);
-
 typedef enum {
     MCP4822_DAC_A,
     MCP4822_DAC_B,
 } mcp4822_dac_t;
+
+typedef int16_t (*mcp4822_sample_cb_t)(mcp4822_dac_t dac, void *data);
 
 typedef struct {
     PIO pio;

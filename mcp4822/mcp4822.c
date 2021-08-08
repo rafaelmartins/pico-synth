@@ -11,12 +11,12 @@ mcp4822_init(mcp4822_t *m)
     hard_assert(m->pio);
 
     mutex_init(&m->mtx);
-    m->cb[0] = NULL;
-    m->cb[1] = NULL;
-    m->cb_data[0] = NULL;
-    m->cb_data[1] = NULL;
-    m->data[0] = mcp4822_offset;
-    m->data[1] = mcp4822_offset;
+    m->cb[MCP4822_DAC_A] = NULL;
+    m->cb[MCP4822_DAC_B] = NULL;
+    m->cb_data[MCP4822_DAC_A] = NULL;
+    m->cb_data[MCP4822_DAC_B] = NULL;
+    m->data[MCP4822_DAC_A] = mcp4822_offset;
+    m->data[MCP4822_DAC_B] = mcp4822_offset;
     m->resend = false;
 
     if (m->dual) {
@@ -52,15 +52,15 @@ __not_in_flash_func(_set)(mcp4822_t *m)
     if (m->dual) {
         uint32_t cmd =
             // !A/B   | !GA       | !SHDN     | D11:D0
-            (0 << 31) | (1 << 29) | (1 << 28) | ((_fix_offset(m->data[0]) & 0xfff) << 16) |
-            (1 << 15) | (1 << 13) | (1 << 12) |  (_fix_offset(m->data[1]) & 0xfff);
+            (0 << 31) | (1 << 29) | (1 << 28) | ((_fix_offset(m->data[MCP4822_DAC_A]) & 0xfff) << 16) |
+            (1 << 15) | (1 << 13) | (1 << 12) |  (_fix_offset(m->data[MCP4822_DAC_B]) & 0xfff);
 
         *(io_rw_32 *)&m->pio->txf[m->sm] = cmd;
     }
     else {
         uint16_t cmd =
             // !A/B   | !GA       | !SHDN     | D11:D0
-            (0 << 15) | (1 << 13) | (1 << 12) | (_fix_offset(m->data[0]) & 0xfff);
+            (0 << 15) | (1 << 13) | (1 << 12) | (_fix_offset(m->data[MCP4822_DAC_A]) & 0xfff);
 
         *(io_rw_16 *)&m->pio->txf[m->sm] = cmd;
     }
@@ -77,17 +77,17 @@ mcp4822_update(mcp4822_t *m)
 
     mutex_enter_blocking(&m->mtx);
 
-    if (m->cb[0] == NULL && m->cb[1] == NULL) {
+    if (m->cb[MCP4822_DAC_A] == NULL && m->cb[MCP4822_DAC_B] == NULL) {
         mutex_exit(&m->mtx);
         return false;
     }
 
     if (!m->resend) {
-        if (m->cb[0] != NULL)
-            m->data[0] = m->cb[0](m->cb_data[0]);
+        if (m->cb[MCP4822_DAC_A] != NULL)
+            m->data[MCP4822_DAC_A] = m->cb[MCP4822_DAC_A](MCP4822_DAC_A, m->cb_data[MCP4822_DAC_A]);
 
-        if (m->dual && m->cb[1] != NULL)
-            m->data[1] = m->cb[1](m->cb_data[1]);
+        if (m->dual && m->cb[MCP4822_DAC_B] != NULL)
+            m->data[MCP4822_DAC_B] = m->cb[MCP4822_DAC_B](MCP4822_DAC_B, m->cb_data[MCP4822_DAC_B]);
     }
 
     mutex_exit(&m->mtx);

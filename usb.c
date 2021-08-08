@@ -1,7 +1,6 @@
 #include <pico/stdlib.h>
 #include <pico/unique_id.h>
 #include <tusb.h>
-#include <controller.h>
 
 static uint8_t buf[1024];
 
@@ -70,17 +69,4 @@ tud_descriptor_string_cb(uint8_t index, uint16_t langid)
     }
 
     return NULL;
-}
-
-
-bool
-tud_vendor_control_request_cb(uint8_t rhport, tusb_control_request_t const * request)
-{
-    uint16_t l = controller_usb_request_cb(
-        request->bRequest,
-        request->bmRequestType_bit.direction == TUSB_DIR_OUT,
-        request->wValue,
-        request->wIndex,
-        buf);
-    return tud_control_xfer(rhport, request, buf, l);
 }
