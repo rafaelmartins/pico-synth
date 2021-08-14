@@ -1,6 +1,7 @@
 #pragma once
 
 #include <hardware/uart.h>
+#include <pico/util/queue.h>
 #include <ec11.h>
 #include <eeprom-i2c.h>
 #include <mcp4822.h>
@@ -8,7 +9,13 @@
 #include <oled-tui.h>
 #include <oscillator.h>
 
+#ifndef SYNTH_NUM_OSCILLATORS
 #define SYNTH_NUM_OSCILLATORS 6
+#endif
+
+#ifndef SYNTH_QUEUE_SIZE
+#define SYNTH_QUEUE_SIZE 64
+#endif
 
 typedef struct {
     mcp4822_t dac;
@@ -27,6 +34,8 @@ typedef struct {
         midi_t midi_uart;
         midi_t midi_usb;
     } midi;
+
+    queue_t queues[2];
 } synth_t;
 
 int synth_init(synth_t *s);

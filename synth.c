@@ -1,3 +1,4 @@
+#include <pico/util/queue.h>
 #include <tusb.h>
 #include <midi.h>
 #include <oscillator.h>
@@ -45,15 +46,8 @@ midi_channel_cb(midi_command_type_t cmd, uint8_t ch, uint8_t *data, uint8_t data
 static int16_t
 sample_cb(mcp4822_dac_t dac, void *data)
 {
-    int16_t rv = 0;
-
-    for (size_t i = 0; i < SYNTH_NUM_OSCILLATORS; i++) {
-        if (dac != synth->oscillators[i].channel || synth->oscillators[i].oscillator.note == NULL)
-            continue;
-
-        rv += oscillator_next_sample(&(synth->oscillators[i].oscillator)) / SYNTH_NUM_OSCILLATORS;
-    }
-
+    static int16_t rv;
+    queue_remove_blocking(&(synth->queues[dac]), &rv);
     return rv;
 }
 
@@ -89,6 +83,9 @@ synth_init(synth_t *s)
     midi_set_channel_callback(&(s->midi.midi_uart), midi_channel_cb);
     midi_set_channel_callback(&(s->midi.midi_usb), midi_channel_cb);
 
+    queue_init(&(s->queues[MCP4822_DAC_A]), sizeof(int16_t), SYNTH_QUEUE_SIZE);
+    queue_init(&(s->queues[MCP4822_DAC_B]), sizeof(int16_t), SYNTH_QUEUE_SIZE);
+
     return PICO_OK;
 }
 
@@ -100,6 +97,22 @@ synth_core1(void)
 
     while (true)
         mcp4822_update(&(synth->dac));
+}
+
+
+static inline int16_t
+get_sample(mcp4822_dac_t dac)
+{
+    int16_t rv = 0;
+
+    for (size_t i = 0; i < SYNTH_NUM_OSCILLATORS; i++) {
+        if (dac != synth->oscillators[i].channel || synth->oscillators[i].oscillator.note == NULL)
+            continue;
+
+        rv += oscillator_next_sample(&(synth->oscillators[i].oscillator)) / SYNTH_NUM_OSCILLATORS;
+    }
+
+    return rv;
 }
 
 
@@ -118,4 +131,16 @@ synth_task(void)
         midi_push_byte(&(synth->midi.midi_uart), uart_getc(synth->midi.uart));
 
     ec11_task(&(synth->encoder));
+
+    static int16_t sample;
+
+    while (!queue_is_full(&(synth->queues[MCP4822_DAC_A]))) {
+        sample = get_sample(MCP4822_DAC_A);
+        queue_add_blocking(&(synth->queues[MCP4822_DAC_A]), &sample);
+    }
+
+    while (!queue_is_full(&(synth->queues[MCP4822_DAC_B]))) {
+        sample = get_sample(MCP4822_DAC_B);
+        queue_add_blocking(&(synth->queues[MCP4822_DAC_B]), &sample);
+    }
 }
