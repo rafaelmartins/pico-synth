@@ -1,1 +1,27 @@
 /build/
+
+# KiCad
+*.000
+*.bak
+*.bck
+*.kicad_pcb-bak
+*~
+_autosave-*
+*.tmp
+*.dsn
+*.ses
+*.sch-bak
+fp-info-cache
+
+# Gerber
+*.drl
+*.gbl
+*.gbo
+*.gbp
+*.gbr
+*.gbs
+*.gm1
+*.gtl
+*.gto
+*.gtp
+*.gts
