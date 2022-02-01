@@ -5,8 +5,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "pico-synth"
-Date "2022-01-19"
-Rev "2.0"
+Date "2022-02-01"
+Rev "2.1"
 Comp ""
 Comment1 ""
 Comment2 ""
@@ -1466,8 +1466,6 @@ NoConn ~ 2650 3150
 NoConn ~ 2650 3250
 NoConn ~ 4050 2950
 NoConn ~ 4050 2850
-NoConn ~ 4050 2750
-NoConn ~ 4050 2650
 NoConn ~ 4050 2450
 NoConn ~ 4050 2350
 NoConn ~ 4050 2250
@@ -1536,4 +1534,108 @@ Wire Wire Line
 	4050 3150 4150 3150
 Wire Wire Line
 	4050 3250 4150 3250
+$Comp
+L Device:LED D3
+U 1 1 61F9B25F
+P 8050 1750
+F 0 "D3" V 8089 1632 50  0000 R CNN
+F 1 "LED" V 7998 1632 50  0000 R CNN
+F 2 "LED_THT:LED_D3.0mm" H 8050 1750 50  0001 C CNN
+F 3 "~" H 8050 1750 50  0001 C CNN
+	1    8050 1750
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR0101
+U 1 1 61F9C231
+P 8050 1950
+F 0 "#PWR0101" H 8050 1700 50  0001 C CNN
+F 1 "GND" H 8055 1777 50  0000 C CNN
+F 2 "" H 8050 1950 50  0001 C CNN
+F 3 "" H 8050 1950 50  0001 C CNN
+	1    8050 1950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:LED D2
+U 1 1 61FB2915
+P 7600 1750
+F 0 "D2" V 7639 1632 50  0000 R CNN
+F 1 "LED" V 7548 1632 50  0000 R CNN
+F 2 "LED_THT:LED_D3.0mm" H 7600 1750 50  0001 C CNN
+F 3 "~" H 7600 1750 50  0001 C CNN
+	1    7600 1750
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 61FB291B
+P 7600 1950
+F 0 "#PWR0102" H 7600 1700 50  0001 C CNN
+F 1 "GND" H 7605 1777 50  0000 C CNN
+F 2 "" H 7600 1950 50  0001 C CNN
+F 3 "" H 7600 1950 50  0001 C CNN
+	1    7600 1950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R13
+U 1 1 61FE7FDF
+P 8050 1400
+F 0 "R13" H 7981 1446 50  0000 R CNN
+F 1 "18k" H 7981 1355 50  0000 R CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 7980 1400 50  0001 C CNN
+F 3 "~" H 8050 1400 50  0001 C CNN
+	1    8050 1400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R14
+U 1 1 61FE9F6E
+P 7600 1400
+F 0 "R14" H 7531 1446 50  0000 R CNN
+F 1 "18k" H 7531 1355 50  0000 R CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 7530 1400 50  0001 C CNN
+F 3 "~" H 7600 1400 50  0001 C CNN
+	1    7600 1400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8050 1600 8050 1550
+Wire Wire Line
+	7600 1600 7600 1550
+Wire Wire Line
+	8050 1950 8050 1900
+Wire Wire Line
+	7600 1950 7600 1900
+Text GLabel 8000 1200 0    50   Input ~ 0
+LED2
+Text GLabel 7550 1200 0    50   Input ~ 0
+LED1
+Wire Wire Line
+	8000 1200 8050 1200
+Wire Wire Line
+	8050 1200 8050 1250
+Wire Notes Line
+	7250 2400 7250 1000
+Wire Notes Line
+	7250 1000 8400 1000
+Wire Notes Line
+	8400 1000 8400 2400
+Wire Notes Line
+	8400 2400 7250 2400
+Text Notes 8150 2350 0    50   ~ 0
+LEDs
+Wire Wire Line
+	7550 1200 7600 1200
+Wire Wire Line
+	7600 1200 7600 1250
+Text GLabel 4150 2650 2    50   Output ~ 0
+LED1
+Text GLabel 4150 2750 2    50   Output ~ 0
+LED2
+Wire Wire Line
+	4050 2650 4150 2650
+Wire Wire Line
+	4050 2750 4150 2750
 $EndSCHEMATC
