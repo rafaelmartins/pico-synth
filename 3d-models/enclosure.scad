@@ -5,10 +5,10 @@
 
 thickness = 1.6;
 
-width = 91;
-length = (29.71 + thickness) * 2;
+width = 100;
+length = 1 + (29.71 + thickness) * 2;
 
-pcb_width = 77.724;
+pcb_width = 82.804;
 pcb_length = 55.753;
 pcb_thickness = 1.6;
 pcb_screw_padding = 3.56;
@@ -16,23 +16,23 @@ pcb_base_height = 6.5;
 pcb_base_d = 5;
 pcb_base_screw_d = 1.8;
 
-pcb0_x = thickness;
+pcb0_x = thickness + 0.5;
 pcb0_y = width - pcb_width - 3;
 
 usb_conn_width = 9.1;
 usb_conn_height = 3.9;
-usb_conn_distance_y = 51.75;
+usb_conn_distance_y = 51.85;
 
-height = thickness + pcb_base_height + pcb_thickness + usb_conn_height + 12;
+height = thickness + pcb_base_height + pcb_thickness + usb_conn_height + 10;
 
 oled_hole_z = 3;
 oled_hole_base_z = 1.65;
 oled_hole_base_d = 4;
 oled_hole_d = 1.8;
-oled_hole_spacing_x = 30.4;
+oled_hole_spacing_x = 30.5;
 oled_hole_spacing_y = 28.5;
 oled0_x = (length - oled_hole_spacing_x) / 2;
-oled0_y = pcb0_y - 5;
+oled0_y = pcb0_y - 7;
 oled_screen_width = 33;
 oled_screen_height = 18;
 oled_screen_distance_x = (oled_hole_spacing_x - oled_screen_width) / 2;
@@ -42,11 +42,16 @@ encoder_distance_x = 29.71;
 encoder_distance_y = 34.33;
 encoder_d = 7.3;
 
+led_d = 3.2;
+led_distance_x = 13.467;
+led_distance_y = 73.66;
+led_spacing = 32.502;
+
 jack_d = 5.8 + 0.7;
 jack_out_d = 8.5;
 jack_spacing = 25;
 jack_distance_x = (length - jack_spacing) / 2;
-jack_distance_z = height - 6;
+jack_distance_z = height - 9;
 
 module pcb_base(x, y) {
     translate([x, y, 0]) {
@@ -90,13 +95,18 @@ difference() {
     }
 
     translate([0, pcb0_y, thickness]) {
-        translate([0, usb_conn_distance_y, pcb_base_height + pcb_thickness])
-            cube([thickness, usb_conn_width, usb_conn_height]);
+        translate([0, usb_conn_distance_y, pcb_base_height + pcb_thickness + 0.5])
+            cube([thickness, usb_conn_width, usb_conn_height - 0.5 + 0.1]);
     }
 
     translate([pcb0_x, pcb0_y, 0]) {
         translate([encoder_distance_x, encoder_distance_y, 0])
             cylinder(thickness, d=encoder_d, $fn=20);
+        translate([led_distance_x, led_distance_y, 0]) {
+            cylinder(thickness, d=led_d, $fn=20);
+            translate([led_spacing, 0, 0])
+                cylinder(thickness, d=led_d, $fn=20);
+        }
     }
 
     translate([oled0_x, oled0_y, 0]) {
