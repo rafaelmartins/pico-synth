@@ -27,5 +27,5 @@ typedef enum {
 int oled_tui_init(oled_tui_t *s);
 int oled_tui_clear_line(oled_tui_t *s, uint8_t line);
 void oled_tui_clear(oled_tui_t *s);
-int oled_tui_render(oled_tui_t *s);
 int oled_tui_line(oled_tui_t *s, uint8_t line, const char *str, oled_tui_halign_t align);
+int oled_tui_render(oled_tui_t *s);

@@ -2,7 +2,9 @@ add_library(oled_tui INTERFACE)
 
 target_sources(oled_tui INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/include/oled-tui.h
+    ${CMAKE_CURRENT_LIST_DIR}/include/oled-tui-menu.h
     ${CMAKE_CURRENT_LIST_DIR}/oled-tui.c
+    ${CMAKE_CURRENT_LIST_DIR}/oled-tui-menu.c
     ${CMAKE_CURRENT_LIST_DIR}/font.h
 )
 
