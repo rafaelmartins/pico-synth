@@ -1,5 +1,7 @@
-/build/
+/firmware/build/
 /pcb/pico-synth-backups/
+
+CMakeLists.txt.user
 
 # KiCad
 *.000

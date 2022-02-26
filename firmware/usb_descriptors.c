@@ -2,12 +2,10 @@
 #include <pico/unique_id.h>
 #include <tusb.h>
 
-static uint8_t buf[1024];
-
 static const tusb_desc_device_t desc_device = {
     .bLength            = sizeof(tusb_desc_device_t),
     .bDescriptorType    = TUSB_DESC_DEVICE,
-    .bcdUSB             = 0x0110,
+    .bcdUSB             = 0x0200,
     .bDeviceClass       = 0x00,
     .bDeviceSubClass    = 0x00,
     .bDeviceProtocol    = 0x00,
