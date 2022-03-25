@@ -16,7 +16,7 @@ target_link_libraries(pico-synth PRIVATE
     pico_unique_id
     tinyusb_device
 
-    pico_synth_engine
+    pico_synth_tui
 )
 
 target_include_directories(pico-synth PRIVATE
@@ -29,4 +29,4 @@ target_compile_definitions(tinyusb_device INTERFACE
 
 pico_enable_stdio_uart(pico-synth 1)
 
-add_subdirectory(engine)
+add_subdirectory(tui)
