@@ -1,5 +1,6 @@
 #include <tusb.h>
 #include <pico/stdlib.h>
+#include <pico/time.h>
 #include <pico-synth/tui.h>
 
 static ps_tui_t tui = {
@@ -35,6 +36,14 @@ main(void)
     tusb_init();
 
     hard_assert(ps_tui_init(&tui) == PICO_OK);
+
+    extern const ps_tui_screen_t screen_splash;
+    ps_tui_screen_load(&tui, &screen_splash);
+
+    sleep_ms(2000);
+
+    extern const ps_tui_screen_t screen_main;
+    ps_tui_screen_load(&tui, &screen_main);
 
     while (1) {
         tud_task();

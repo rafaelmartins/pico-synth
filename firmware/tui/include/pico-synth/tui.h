@@ -40,7 +40,6 @@ typedef struct {
         uint64_t rotate_debounce_us;
 
         // private
-        void *_data;
         uint64_t _button_hit;
         uint64_t _rotate_hit;
         uint8_t _rotate_state;
@@ -62,7 +61,68 @@ typedef struct {
         } _ram_pages[8];
         uint8_t _render_cmds[4];  // FIXME: avoid hardcoding size
     } oled;
+
+    uint8_t _selected;
+    uint8_t _selected_line;
+    const struct ps_tui_screen *_current_screen;
 } ps_tui_t;
+
+typedef void (*ps_tui_screen_action_callback_t) (ps_tui_t *tui);
+
+typedef struct {
+    enum {
+        PS_TUI_SCREEN_ACTION_CALLBACK = 1,
+        PS_TUI_SCREEN_ACTION_NEXT,
+    } type;
+    union {
+        const ps_tui_screen_action_callback_t callback;
+        const struct ps_tui_screen *next;
+    } action;
+} ps_tui_screen_action_t;
+
+typedef struct {
+    void (*render_callback) (ps_tui_t *tui);
+    void (*encoder_callback) (ps_tui_t *tui, ps_tui_encoder_action_t act);
+} ps_tui_screen_callback_t;
+
+typedef struct {
+    const char title[17];
+    uint8_t num_items;
+    const struct {
+        const char content[15];
+        const ps_tui_screen_action_t action;
+    } items[];
+} ps_tui_screen_menu_t;
+
+typedef struct {
+    const char content[17];
+    ps_tui_oled_halign_t align;
+} ps_tui_screen_line_t;
+
+typedef struct {
+    const ps_tui_screen_line_t line0;
+    const ps_tui_screen_line_t line1;
+    const ps_tui_screen_line_t line2;
+    const ps_tui_screen_line_t line3;
+    const ps_tui_screen_line_t line4;
+    const ps_tui_screen_line_t line5;
+    const ps_tui_screen_line_t line6;
+    const ps_tui_screen_line_t line7;
+    const ps_tui_screen_action_t action;
+} ps_tui_screen_lines_t;
+
+typedef struct ps_tui_screen {
+    enum {
+        PS_TUI_SCREEN_CALLBACK = 1,
+        PS_TUI_SCREEN_MENU,
+        PS_TUI_SCREEN_LINES,
+    } type;
+    union {
+        const ps_tui_screen_callback_t *callback;
+        const ps_tui_screen_menu_t *menu;
+        const ps_tui_screen_lines_t *lines;
+    } screen;
+} ps_tui_screen_t;
 
 int ps_tui_init(ps_tui_t *tui);
 int ps_tui_task(ps_tui_t *tui);
@@ -73,3 +133,5 @@ int ps_tui_eeprom_write(ps_tui_t *tui, uint16_t addr, uint8_t *data, size_t data
 int ps_tui_oled_clear_line(ps_tui_t *tui, uint8_t line);
 void ps_tui_oled_clear(ps_tui_t *tui);
 int ps_tui_oled_line(ps_tui_t *tui, uint8_t line, const char *str, ps_tui_oled_halign_t align);
+
+int ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen);

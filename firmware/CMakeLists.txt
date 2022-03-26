@@ -9,6 +9,10 @@ pico_sdk_init()
 add_executable(pico-synth
     main.c
     usb_descriptors.c
+
+    screen-main.c
+    screen-settings.c
+    screen-splash.c
 )
 
 target_link_libraries(pico-synth PRIVATE
