@@ -2,6 +2,7 @@
 #include <pico/stdlib.h>
 #include <pico/time.h>
 #include <pico-synth/tui.h>
+#include "screens.h"
 #include "settings.h"
 
 static settings_ctx_t settings;
@@ -42,12 +43,8 @@ main(void)
 
     hard_assert(ps_tui_init(&tui) == PICO_OK);
 
-    extern const ps_tui_screen_t screen_splash;
     ps_tui_screen_load(&tui, &screen_splash);
-
     sleep_ms(2000);
-
-    extern const ps_tui_screen_t screen_main;
     ps_tui_screen_load(&tui, &screen_main);
 
     while (1) {

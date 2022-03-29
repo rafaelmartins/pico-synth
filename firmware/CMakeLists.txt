@@ -10,10 +10,8 @@ add_executable(pico-synth
     main.c
     usb_descriptors.c
 
-    screen-main.c
-    screen-settings.c
-    screen-settings-voices.c
-    screen-splash.c
+    screens.c
+    screens.h
 
     settings.c
     settings.h
