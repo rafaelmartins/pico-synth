@@ -62,10 +62,25 @@ typedef struct {
         uint8_t _render_cmds[4];  // FIXME: avoid hardcoding size
     } oled;
 
+    void *ctx_data;
+
+    // private
     uint8_t _selected;
     uint8_t _selected_line;
     const struct ps_tui_screen *_current_screen;
 } ps_tui_t;
+
+typedef void (*ps_tui_screen_line_callback_t) (ps_tui_t *tui, char *buf, size_t buflen);
+
+typedef struct {
+    char content[17];
+    ps_tui_oled_halign_t align;
+    ps_tui_screen_line_callback_t callback;
+    enum {
+        PS_TUI_SCREEN_LINE_CONTENT,
+        PS_TUI_SCREEN_LINE_CALLBACK,
+    } type;
+} ps_tui_screen_line_t;
 
 typedef void (*ps_tui_screen_action_callback_t) (ps_tui_t *tui);
 
@@ -75,7 +90,7 @@ typedef struct {
         PS_TUI_SCREEN_ACTION_NEXT,
     } type;
     union {
-        const ps_tui_screen_action_callback_t callback;
+        ps_tui_screen_action_callback_t callback;
         const struct ps_tui_screen *next;
     } action;
 } ps_tui_screen_action_t;
@@ -86,29 +101,24 @@ typedef struct {
 } ps_tui_screen_callback_t;
 
 typedef struct {
-    const char title[17];
+    ps_tui_screen_line_t title;
     uint8_t num_items;
-    const struct {
-        const char content[15];
-        const ps_tui_screen_action_t action;
+    struct {
+        char content[15];
+        ps_tui_screen_action_t action;
     } items[];
 } ps_tui_screen_menu_t;
 
 typedef struct {
-    const char content[17];
-    ps_tui_oled_halign_t align;
-} ps_tui_screen_line_t;
-
-typedef struct {
-    const ps_tui_screen_line_t line0;
-    const ps_tui_screen_line_t line1;
-    const ps_tui_screen_line_t line2;
-    const ps_tui_screen_line_t line3;
-    const ps_tui_screen_line_t line4;
-    const ps_tui_screen_line_t line5;
-    const ps_tui_screen_line_t line6;
-    const ps_tui_screen_line_t line7;
-    const ps_tui_screen_action_t action;
+    ps_tui_screen_line_t line0;
+    ps_tui_screen_line_t line1;
+    ps_tui_screen_line_t line2;
+    ps_tui_screen_line_t line3;
+    ps_tui_screen_line_t line4;
+    ps_tui_screen_line_t line5;
+    ps_tui_screen_line_t line6;
+    ps_tui_screen_line_t line7;
+    ps_tui_screen_action_t action;
 } ps_tui_screen_lines_t;
 
 typedef struct ps_tui_screen {

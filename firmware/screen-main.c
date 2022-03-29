@@ -19,7 +19,7 @@ encoder_callback(ps_tui_t *tui, ps_tui_encoder_action_t act)
 }
 
 
-static ps_tui_screen_callback_t callback = {
+static const ps_tui_screen_callback_t callback = {
     .render_callback = render_callback,
     .encoder_callback = encoder_callback,
 };

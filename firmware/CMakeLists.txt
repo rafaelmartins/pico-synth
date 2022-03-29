@@ -12,7 +12,11 @@ add_executable(pico-synth
 
     screen-main.c
     screen-settings.c
+    screen-settings-voices.c
     screen-splash.c
+
+    settings.c
+    settings.h
 )
 
 target_link_libraries(pico-synth PRIVATE

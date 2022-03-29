@@ -2,8 +2,10 @@
 #include "driver-ec11.h"
 #include "driver-oled.h"
 
+// FIXME: make this thread safe? is it needed?
 static char buf_selected[17]   = "> ";
 static char buf_unselected[17] = "  ";
+static char buf_line[17];
 
 
 static void
@@ -23,6 +25,29 @@ run_action(ps_tui_t *tui, const ps_tui_screen_action_t *act)
         ps_tui_screen_load(tui, act->action.next);
         break;
     }
+}
+
+
+static const char*
+line_get(ps_tui_t *tui, const ps_tui_screen_line_t *l)
+{
+    if (tui == NULL || l == NULL)
+        return NULL;
+
+    switch (l->type) {
+    case PS_TUI_SCREEN_LINE_CALLBACK:
+        if (l->callback != NULL) {
+            memset(buf_line, 0, sizeof(buf_line));
+            l->callback(tui, buf_line, sizeof(buf_line));
+            return buf_line;
+        }
+        break;
+
+    case PS_TUI_SCREEN_LINE_CONTENT:
+        return l->content;
+    }
+
+    return NULL;
 }
 
 
@@ -131,7 +156,8 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
         if (screen->screen.menu == NULL)
             return PICO_OK;
 
-        ps_tui_oled_line(tui, 0, screen->screen.menu->title, PS_TUI_OLED_HALIGN_CENTER);
+        ps_tui_oled_clear(tui);
+        ps_tui_oled_line(tui, 0, line_get(tui, &screen->screen.menu->title), PS_TUI_OLED_HALIGN_CENTER);
         tui->_selected_line = 0;
         tui->_selected = 0;
         for (uint8_t i = 0; i < (screen->screen.menu->num_items > 6 ? 6 : screen->screen.menu->num_items); i++) {
@@ -146,14 +172,14 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
         if (screen->screen.lines == NULL)
             return PICO_OK;
 
-        ps_tui_oled_line(tui, 0, screen->screen.lines->line0.content, screen->screen.lines->line0.align);
-        ps_tui_oled_line(tui, 1, screen->screen.lines->line1.content, screen->screen.lines->line1.align);
-        ps_tui_oled_line(tui, 2, screen->screen.lines->line2.content, screen->screen.lines->line2.align);
-        ps_tui_oled_line(tui, 3, screen->screen.lines->line3.content, screen->screen.lines->line3.align);
-        ps_tui_oled_line(tui, 4, screen->screen.lines->line4.content, screen->screen.lines->line4.align);
-        ps_tui_oled_line(tui, 5, screen->screen.lines->line5.content, screen->screen.lines->line5.align);
-        ps_tui_oled_line(tui, 6, screen->screen.lines->line6.content, screen->screen.lines->line6.align);
-        ps_tui_oled_line(tui, 7, screen->screen.lines->line7.content, screen->screen.lines->line7.align);
+        ps_tui_oled_line(tui, 0, line_get(tui, &screen->screen.lines->line0), screen->screen.lines->line0.align);
+        ps_tui_oled_line(tui, 1, line_get(tui, &screen->screen.lines->line1), screen->screen.lines->line1.align);
+        ps_tui_oled_line(tui, 2, line_get(tui, &screen->screen.lines->line2), screen->screen.lines->line2.align);
+        ps_tui_oled_line(tui, 3, line_get(tui, &screen->screen.lines->line3), screen->screen.lines->line3.align);
+        ps_tui_oled_line(tui, 4, line_get(tui, &screen->screen.lines->line4), screen->screen.lines->line4.align);
+        ps_tui_oled_line(tui, 5, line_get(tui, &screen->screen.lines->line5), screen->screen.lines->line5.align);
+        ps_tui_oled_line(tui, 6, line_get(tui, &screen->screen.lines->line6), screen->screen.lines->line6.align);
+        ps_tui_oled_line(tui, 7, line_get(tui, &screen->screen.lines->line7), screen->screen.lines->line7.align);
         break;
 
     default:

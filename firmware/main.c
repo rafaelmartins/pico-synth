@@ -2,6 +2,9 @@
 #include <pico/stdlib.h>
 #include <pico/time.h>
 #include <pico-synth/tui.h>
+#include "settings.h"
+
+static settings_ctx_t settings;
 
 static ps_tui_t tui = {
     .i2c = {
@@ -25,6 +28,8 @@ static ps_tui_t tui = {
     .oled = {
         .controller = PS_TUI_OLED_SH1106,
     },
+
+    .ctx_data = &settings,
 };
 
 
