@@ -1,0 +1,16 @@
+.program mcp4822
+.side_set 2
+
+.wrap_target
+l1:
+    out pins, 1     side 0b00
+    jmp x-- l1      side 0b01
+    mov x, y        side 0b10
+    pull ifempty    side 0b10
+l2:
+    out pins, 1     side 0b00
+    jmp x-- l2      side 0b01
+public ep:
+    mov x, y        side 0b10
+    pull ifempty    side 0b10
+.wrap

@@ -6,7 +6,7 @@
 
 #define notes_last 127
 
-static const note_t notes[] = {
+static const ps_engine_note_t notes[] = {
     {
         .id   = 0,
         .name = "C-1",

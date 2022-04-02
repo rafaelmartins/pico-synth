@@ -71,7 +71,7 @@ def dump_data_vars(items, suffix=''):
 
 def dump_notes():
     yield ''
-    yield 'static const note_t notes[] = {'
+    yield 'static const ps_engine_note_t notes[] = {'
 
     for i, f in enumerate(note_frequencies):
         step = waveform_samples_per_cycle / (audio_sample_rate / f)
