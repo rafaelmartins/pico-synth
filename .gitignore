@@ -1,4 +1,5 @@
 /build/
+/pcb/pico-synth-backups/
 
 # KiCad
 *.000
