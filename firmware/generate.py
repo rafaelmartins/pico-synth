@@ -102,7 +102,6 @@ generators = {
     ),
     os.path.join('engine', 'module-oscillator-data.h'): itertools.chain(
         dump_macros({
-            'waveform_amplitude': format_hex(waveform_amplitude),
             'waveform_samples_per_cycle': format_hex(waveform_samples_per_cycle),
         }),
         dump_data_vars(waveforms, '_table'),

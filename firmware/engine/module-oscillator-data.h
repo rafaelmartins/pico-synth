@@ -2,7 +2,6 @@
 
 #pragma once
 
-#define waveform_amplitude 0x07ff
 #define waveform_samples_per_cycle 0x2000
 
 static const int16_t sine_table[] = {
