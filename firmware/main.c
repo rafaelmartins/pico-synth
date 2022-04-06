@@ -1,6 +1,9 @@
 #include <tusb.h>
 #include <pico/stdlib.h>
+#include <pico/multicore.h>
 #include <pico/time.h>
+#include <pico-synth/engine.h>
+#include <pico-synth/engine/module-oscillator.h>
 #include <pico-synth/tui.h>
 #include "screens.h"
 #include "settings.h"
@@ -33,6 +36,52 @@ static ps_tui_t tui = {
     .ctx_data = &settings,
 };
 
+static ps_engine_module_oscillator_ctx_t oscillator_ctx1;
+static ps_engine_module_oscillator_ctx_t oscillator_ctx2;
+
+static ps_engine_module_ctx_t oscillator_mod_ctx1 = {
+    .mod = &ps_engine_module_oscillator,
+    .data = &oscillator_ctx1,
+};
+static ps_engine_module_ctx_t oscillator_mod_ctx2 = {
+    .mod = &ps_engine_module_oscillator,
+    .data = &oscillator_ctx2,
+};
+
+static ps_engine_t engine = {
+    .dac = {
+        .pio = pio0,
+        .state_machine = 0,
+        .basepin = 6,
+    },
+
+    .channel = {
+        {
+            .root = &oscillator_mod_ctx1,
+        },
+        {
+            .root = &oscillator_mod_ctx2,
+        },
+    },
+};
+
+
+static void
+main1(void)
+{
+    hard_assert(ps_engine_init(&engine) == PICO_OK);
+
+    ps_engine_module_oscillator_set_waveform(&oscillator_ctx1, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE);
+    ps_engine_module_oscillator_set_note(&oscillator_ctx1, 69);
+
+    ps_engine_module_oscillator_set_waveform(&oscillator_ctx2, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE);
+    ps_engine_module_oscillator_set_note(&oscillator_ctx2, 69);
+
+    while (1) {
+        hard_assert(ps_engine_task(&engine) == PICO_OK);
+    }
+}
+
 
 int
 main(void)
@@ -42,6 +91,8 @@ main(void)
     tusb_init();
 
     hard_assert(ps_tui_init(&tui) == PICO_OK);
+
+    multicore_launch_core1(main1);
 
     ps_tui_screen_load(&tui, &screen_splash);
     sleep_ms(2000);

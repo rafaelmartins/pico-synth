@@ -20,6 +20,7 @@ add_executable(pico-synth
 target_link_libraries(pico-synth PRIVATE
     pico_stdlib
     pico_unique_id
+    pico_multicore
     tinyusb_device
 
     pico_synth_engine

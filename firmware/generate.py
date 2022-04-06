@@ -93,6 +93,11 @@ generators = {
             'mcp4822_clkdiv': cpu_frequency / (audio_sample_rate * cpu_cycles_per_sample),
         }),
     ),
+    os.path.join('engine', 'engine-data.h'): itertools.chain(
+        dump_macros({
+            'waveform_amplitude': format_hex(waveform_amplitude),
+        }),
+    ),
     os.path.join('engine', 'note-data.h'): itertools.chain(
         dump_headers(['pico-synth/engine.h']),
         dump_macros({
