@@ -1,6 +1,7 @@
 /firmware/build/
 /pcb/pico-synth-backups/
 
+.gdb_history
 CMakeLists.txt.user
 
 # KiCad
