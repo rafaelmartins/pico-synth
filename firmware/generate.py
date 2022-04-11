@@ -106,6 +106,7 @@ generators = {
         dump_notes(),
     ),
     os.path.join('engine', 'module-oscillator-data.h'): itertools.chain(
+        dump_headers(['stdint.h']),
         dump_macros({
             'waveform_samples_per_cycle': format_hex(waveform_samples_per_cycle),
         }),
