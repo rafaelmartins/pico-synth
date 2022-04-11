@@ -10,17 +10,34 @@ mcp4822_init(ps_engine_t *p)
     hard_assert(p);
     hard_assert(p->dac.pio);
 
-    uint offset = pio_add_program(p->dac.pio, &mcp4822_program);
-    pio_gpio_init(p->dac.pio, p->dac.basepin);
-    pio_gpio_init(p->dac.pio, p->dac.basepin + 1);
-    pio_gpio_init(p->dac.pio, p->dac.basepin + 2);
-    pio_sm_set_consecutive_pindirs(p->dac.pio, p->dac.state_machine, p->dac.basepin, 3, true);
-    pio_sm_config c = mcp4822_program_get_default_config(offset);
+    const pio_program_t *prog;
+    pio_sm_config (*prog_get_default_config)(uint offset);
+    uint offset_ep;
+    uint pin_count;
+
+    if (p->dac.with_ldac) {
+        prog = &mcp4822_ldac_program;
+        prog_get_default_config = mcp4822_ldac_program_get_default_config;
+        offset_ep = mcp4822_ldac_offset_ep;
+        pin_count = 4;
+    }
+    else {
+        prog = &mcp4822_program;
+        prog_get_default_config = mcp4822_program_get_default_config;
+        offset_ep = mcp4822_offset_ep;
+        pin_count = 3;
+    }
+
+    uint offset = pio_add_program(p->dac.pio, prog);
+    for (uint i = 0; i < pin_count; i++)
+        pio_gpio_init(p->dac.pio, p->dac.basepin + i);
+    pio_sm_set_consecutive_pindirs(p->dac.pio, p->dac.state_machine, p->dac.basepin, pin_count, true);
+    pio_sm_config c = prog_get_default_config(offset);
     sm_config_set_sideset_pins(&c, p->dac.basepin + 1);
     sm_config_set_out_pins(&c, p->dac.basepin, 1);
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
     sm_config_set_out_shift(&c, false, true, 32);
-    pio_sm_init(p->dac.pio, p->dac.state_machine, offset + mcp4822_offset_ep, &c);
+    pio_sm_init(p->dac.pio, p->dac.state_machine, offset + offset_ep, &c);
     pio_sm_exec(p->dac.pio, p->dac.state_machine, pio_encode_set(pio_y, 15));
     pio_sm_set_clkdiv(p->dac.pio, p->dac.state_machine, mcp4822_clkdiv / 2);
     pio_sm_set_enabled(p->dac.pio, p->dac.state_machine, true);

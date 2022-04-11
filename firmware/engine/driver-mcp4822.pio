@@ -14,3 +14,20 @@ public ep:
     mov x, y        side 0b10
     pull ifempty    side 0b10
 .wrap
+
+.program mcp4822_ldac
+.side_set 3
+
+.wrap_target
+l1:
+    out pins, 1     side 0b100
+    jmp x-- l1      side 0b101
+    mov x, y        side 0b110
+    pull ifempty    side 0b110
+l2:
+    out pins, 1     side 0b100
+    jmp x-- l2      side 0b101
+public ep:
+    mov x, y        side 0b010
+    pull ifempty    side 0b010
+.wrap

@@ -39,6 +39,7 @@ typedef struct {
         PIO pio;
         uint state_machine;
         uint basepin;
+        bool with_ldac;
     } dac;
 
     struct {
