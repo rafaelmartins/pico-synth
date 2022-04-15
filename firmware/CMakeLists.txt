@@ -8,7 +8,6 @@ pico_sdk_init()
 
 add_executable(pico-synth
     main.c
-    usb_descriptors.c
 
     screens.c
     screens.h
@@ -19,16 +18,12 @@ add_executable(pico-synth
 
 target_link_libraries(pico-synth PRIVATE
     pico_stdlib
-    pico_unique_id
     pico_multicore
-    tinyusb_device
+
 
     pico_synth_engine
+    pico_synth_midi
     pico_synth_tui
-)
-
-target_include_directories(pico-synth PRIVATE
-    .
 )
 
 target_compile_definitions(tinyusb_device INTERFACE
@@ -38,4 +33,5 @@ target_compile_definitions(tinyusb_device INTERFACE
 pico_enable_stdio_uart(pico-synth 1)
 
 add_subdirectory(engine)
+add_subdirectory(midi)
 add_subdirectory(tui)

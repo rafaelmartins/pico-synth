@@ -50,20 +50,21 @@ const uint16_t*
 tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 {
     switch (index) {
-        case 0:
-            return lang;
-        case 1:
-            return manufacturer;
-        case 2:
-            return product;
-        case 3:
-            if (serial[1] == 0) {
-                char serial_str[PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2 + 1];
-                pico_get_unique_board_id_string(serial_str, sizeof(serial_str));
-                for (size_t i = 0; serial_str[i] != 0; i++)
-                    serial[i + 1] = serial_str[i];
-            }
-            return serial;
+    case 0:
+        return lang;
+    case 1:
+        return manufacturer;
+    case 2:
+        // FIXME: allow to configure the product name
+        return product;
+    case 3:
+        if (serial[1] == 0) {
+            char serial_str[PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2 + 1];
+            pico_get_unique_board_id_string(serial_str, sizeof(serial_str));
+            for (size_t i = 0; serial_str[i] != 0; i++)
+                serial[i + 1] = serial_str[i];
+        }
+        return serial;
     }
 
     return NULL;
