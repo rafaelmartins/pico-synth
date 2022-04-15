@@ -39,11 +39,11 @@ static ps_tui_t tui = {
 static ps_engine_module_oscillator_ctx_t oscillator_ctx1;
 static ps_engine_module_oscillator_ctx_t oscillator_ctx2;
 
-static ps_engine_module_ctx_t oscillator_mod_ctx1 = {
+static ps_engine_module_source_ctx_t oscillator_mod_ctx1 = {
     .mod = &ps_engine_module_oscillator,
     .data = &oscillator_ctx1,
 };
-static ps_engine_module_ctx_t oscillator_mod_ctx2 = {
+static ps_engine_module_source_ctx_t oscillator_mod_ctx2 = {
     .mod = &ps_engine_module_oscillator,
     .data = &oscillator_ctx2,
 };
@@ -57,10 +57,10 @@ static ps_engine_t engine = {
 
     .channel = {
         {
-            .root = &oscillator_mod_ctx1,
+            .source = &oscillator_mod_ctx1,
         },
         {
-            .root = &oscillator_mod_ctx2,
+            .source = &oscillator_mod_ctx2,
         },
     },
 };
@@ -97,6 +97,7 @@ main(void)
     ps_tui_screen_load(&tui, &screen_splash);
     sleep_ms(2000);
     ps_tui_screen_load(&tui, &screen_main);
+
 
     while (1) {
         tud_task();

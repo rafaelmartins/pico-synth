@@ -51,7 +51,7 @@ init(ps_engine_module_oscillator_ctx_t *ctx)
 
 
 static int16_t
-__not_in_flash_func(sample)(int16_t in, ps_engine_phase_t *p, ps_engine_module_oscillator_ctx_t *ctx)
+__not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ctx_t *ctx)
 {
     if (p == NULL || ctx == NULL || ctx->_note == NULL)
         return 0;
@@ -106,8 +106,7 @@ __not_in_flash_func(sample)(int16_t in, ps_engine_phase_t *p, ps_engine_module_o
 }
 
 
-ps_engine_module_t ps_engine_module_oscillator = {
-    .type = PS_ENGINE_MODULE_TYPE_SOURCE,
+ps_engine_module_source_t ps_engine_module_oscillator = {
     .init_func = (ps_engine_module_init_func_t) init,
-    .sample_func = (ps_engine_module_sample_func_t) sample,
+    .sample_func = (ps_engine_module_source_sample_func_t) sample,
 };

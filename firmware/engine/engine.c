@@ -4,9 +4,15 @@
 
 
 static void
-init_channel(ps_engine_module_ctx_t *root)
+init_channel(ps_engine_channel_t *chan)
 {
-    for (ps_engine_module_ctx_t *c = root; c != NULL; c = c->next) {
+    if (chan == NULL || chan->source->mod == NULL)
+        return;
+
+    if (chan->source->mod->init_func != NULL)
+        chan->source->mod->init_func(chan->source->data);
+
+    for (ps_engine_module_filter_ctx_t *c = chan->filters; c != NULL; c = c->next) {
         if (c->mod == NULL || c->mod->init_func == NULL)
             continue;
 
@@ -20,8 +26,8 @@ ps_engine_init(ps_engine_t *e)
 {
     hard_assert(e);
 
-    init_channel(e->channel[0].root);
-    init_channel(e->channel[1].root);
+    init_channel(&e->channel[0]);
+    init_channel(&e->channel[1]);
 
     mcp4822_init(e);
     return PICO_OK;
@@ -39,14 +45,18 @@ ps_engine_task(ps_engine_t *e)
 
 
 static inline uint16_t
-__not_in_flash_func(eval_channel)(ps_engine_module_ctx_t *root, ps_engine_phase_t *phase)
+__not_in_flash_func(eval_channel)(ps_engine_channel_t *chan)
 {
-    int16_t rv = 0;
-    for (ps_engine_module_ctx_t *c = root; c != NULL; c = c->next) {
+    if (chan == NULL || chan->source->mod == NULL || chan->source->mod->sample_func == NULL)
+        return waveform_amplitude;
+
+    int16_t rv = chan->source->mod->sample_func(&chan->phase, chan->source->data);
+
+    for (ps_engine_module_filter_ctx_t *c = chan->filters; c != NULL; c = c->next) {
         if (c->mod == NULL || c->mod->sample_func == NULL)
             continue;
 
-        rv = c->mod->sample_func(rv, phase, c->data);
+        rv = c->mod->sample_func(rv, &chan->phase, c->data);
     }
 
     if (rv < -waveform_amplitude)
@@ -61,6 +71,5 @@ uint32_t
 __not_in_flash_func(mcp4822_callback)(ps_engine_t *e)
 {
     // the caller will ensure that engine is not null
-    return (eval_channel(e->channel[0].root, &e->channel[0].phase) << 16) |
-            eval_channel(e->channel[1].root, &e->channel[1].phase);
+    return (eval_channel(&e->channel[0]) << 16) | eval_channel(&e->channel[1]);
 }

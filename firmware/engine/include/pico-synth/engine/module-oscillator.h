@@ -21,7 +21,7 @@ typedef struct {
     bool _sync;
 } ps_engine_module_oscillator_ctx_t;
 
-extern ps_engine_module_t ps_engine_module_oscillator;
+extern ps_engine_module_source_t ps_engine_module_oscillator;
 
 void ps_engine_module_oscillator_set_waveform(ps_engine_module_oscillator_ctx_t *ctx,
                                               ps_engine_module_oscillator_waveform_t wf);
