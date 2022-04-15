@@ -99,7 +99,7 @@ ps_midi_channel_cb(ps_midi_command_type_t cmd, uint8_t channel, uint8_t *data, u
             return ps_engine_module_oscillator_set_note(&oscillator_ctx1, data[0]);
 
     case PS_MIDI_COMMAND_NOTE_OFF:
-        return ps_engine_module_oscillator_unset_note(&oscillator_ctx1, data[0]);
+        break;
     }
 }
 

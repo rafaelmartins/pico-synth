@@ -9,10 +9,10 @@ ps_engine_module_oscillator_set_waveform(ps_engine_module_oscillator_ctx_t *ctx,
     if (ctx == NULL || wf >= PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM__LAST)
         return;
 
-    mutex_enter_blocking(&(ctx->_mtx));
+    mutex_enter_blocking(&ctx->_mtx);
     ctx->_wf = wf;
     ctx->_sync = true;
-    mutex_exit(&(ctx->_mtx));
+    mutex_exit(&ctx->_mtx);
 }
 
 
@@ -22,23 +22,22 @@ ps_engine_module_oscillator_set_note(ps_engine_module_oscillator_ctx_t *ctx, uin
     if (ctx == NULL)
         return;
 
-    mutex_enter_blocking(&(ctx->_mtx));
+    mutex_enter_blocking(&ctx->_mtx);
     ctx->_note = ps_engine_get_note(note);
     ctx->_sync = ctx->_note != NULL;
-    mutex_exit(&(ctx->_mtx));
+    mutex_exit(&ctx->_mtx);
 }
 
 
 void
-ps_engine_module_oscillator_unset_note(ps_engine_module_oscillator_ctx_t *ctx, uint8_t note)
+ps_engine_module_oscillator_sync(ps_engine_module_oscillator_ctx_t *ctx)
 {
     if (ctx == NULL)
         return;
 
-    mutex_enter_blocking(&(ctx->_mtx));
-    if (ctx->_note != NULL && ctx->_note->id == note)
-        ctx->_note = NULL;
-    mutex_exit(&(ctx->_mtx));
+    mutex_enter_blocking(&ctx->_mtx);
+    ctx->_sync = true;
+    mutex_exit(&ctx->_mtx);
 }
 
 
@@ -46,7 +45,7 @@ static void
 init(ps_engine_module_oscillator_ctx_t *ctx)
 {
     hard_assert(ctx);
-    mutex_init(&(ctx->_mtx));
+    mutex_init(&ctx->_mtx);
 }
 
 
@@ -56,7 +55,7 @@ __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ct
     if (p == NULL || ctx == NULL || ctx->_note == NULL)
         return 0;
 
-    mutex_enter_blocking(&(ctx->_mtx));
+    mutex_enter_blocking(&ctx->_mtx);
 
     if (ctx->_sync) {
         p->pint = 0;
@@ -100,13 +99,13 @@ __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ct
         break;
     }
 
-    mutex_exit(&(ctx->_mtx));
+    mutex_exit(&ctx->_mtx);
 
     return rv;
 }
 
 
-ps_engine_module_source_t ps_engine_module_oscillator = {
+const ps_engine_module_source_t ps_engine_module_oscillator = {
     .init_func = (ps_engine_module_init_func_t) init,
     .sample_func = (ps_engine_module_source_sample_func_t) sample,
 };
