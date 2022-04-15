@@ -2,6 +2,7 @@
 #include <pico/multicore.h>
 #include <pico/time.h>
 #include <pico-synth/engine.h>
+#include <pico-synth/engine/module-amplifier.h>
 #include <pico-synth/engine/module-oscillator.h>
 #include <pico-synth/midi.h>
 #include <pico-synth/tui.h>
@@ -48,6 +49,14 @@ static ps_engine_module_source_ctx_t oscillator_mod_ctx2 = {
     .data = &oscillator_ctx2,
 };
 
+static ps_engine_module_amplifier_ctx_t amplifier_ctx1;
+
+static ps_engine_module_filter_ctx_t amplifier_mod_ctx1 = {
+    .mod = &ps_engine_module_amplifier,
+    .data = &amplifier_ctx1,
+};
+
+
 static ps_engine_t engine = {
     .dac = {
         .pio = pio0,
@@ -58,6 +67,7 @@ static ps_engine_t engine = {
     .channel = {
         {
             .source = &oscillator_mod_ctx1,
+            .filters = &amplifier_mod_ctx1,
         },
         {
             .source = &oscillator_mod_ctx2,
@@ -95,10 +105,14 @@ ps_midi_channel_cb(ps_midi_command_type_t cmd, uint8_t channel, uint8_t *data, u
 {
     switch (cmd) {
     case PS_MIDI_COMMAND_NOTE_ON:
-        if (data[1] != 0)
-            return ps_engine_module_oscillator_set_note(&oscillator_ctx1, data[0]);
+        if (data[1] != 0) {
+            ps_engine_module_oscillator_set_note(&oscillator_ctx1, data[0]);
+            ps_engine_module_amplifier_set_gate(&amplifier_ctx1, data[1]);
+            break;
+        }
 
     case PS_MIDI_COMMAND_NOTE_OFF:
+        ps_engine_module_amplifier_unset_gate(&amplifier_ctx1);
         break;
     }
 }
