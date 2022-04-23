@@ -92,7 +92,7 @@ for i in range(wavetable_octaves):
     y = 0
     sawtooth = []
     for i in range(len(blit)):
-        y += blit[i + mid if i < mid else i - mid] - blit_avg
+        y += blit[i + mid if i < mid else i - mid] - 1. / P
         sawtooth.append(-y)
     wavetables['sawtooth'].append(fix_wavetable(sawtooth))
 
