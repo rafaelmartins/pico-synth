@@ -2,4 +2,4 @@
 
 #pragma once
 
-#define mcp4822_clkdiv 88.70214752567693
+#define mcp4822_clkdiv 81.49509803921569

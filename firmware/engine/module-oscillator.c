@@ -73,30 +73,38 @@ __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ct
     }
 
     int16_t rv = 0;
+    uint8_t octave = ctx->_note->id / 12;
 
-    switch (ctx->_wf) {
-    case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE:
-        rv = square_table[p->pint];
-        break;
+    // we return a sine (that is already bandlimited by definition) for any high
+    // octave without an explicit wavetable.
+    if (octave >= wavetable_octaves) {
+        rv = sine_wavetable[p->pint];
+    }
+    else {
+        switch (ctx->_wf) {
+        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE:
+            rv = square_wavetables[octave][p->pint];
+            break;
 
-    case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE:
-        rv = sine_table[p->pint];
-        break;
+        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE:
+            rv = sine_wavetable[p->pint];
+            break;
 
-    case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_TRIANGLE:
-        rv = triangle_table[p->pint];
-        break;
+        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_TRIANGLE:
+            rv = triangle_wavetables[octave][p->pint];
+            break;
 
-    case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_RIGHT_SAW:
-        rv = sawtooth_table[p->pint];
-        break;
+        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_RIGHT_SAW:
+            rv = -sawtooth_wavetables[octave][p->pint];
+            break;
 
-    case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_LEFT_SAW:
-        rv = -sawtooth_table[p->pint];
-        break;
+        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_LEFT_SAW:
+            rv = sawtooth_wavetables[octave][p->pint];
+            break;
 
-    default:
-        break;
+        default:
+            break;
+        }
     }
 
     mutex_exit(&ctx->_mtx);
