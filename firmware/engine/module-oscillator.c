@@ -49,6 +49,23 @@ init(ps_engine_module_oscillator_ctx_t *ctx)
 }
 
 
+static inline uint16_t
+__not_in_flash_func(next_sample_id)(const ps_engine_phase_t *cur)
+{
+    if (cur->pint + 1 == waveform_samples_per_cycle)
+        return cur->pint - waveform_samples_per_cycle + 1;
+    return cur->pint + 1;
+}
+
+
+static inline int16_t
+__not_in_flash_func(interpolate_sample)(const int16_t *table, const ps_engine_phase_t *cur)
+{
+    return (table[cur->pint] * (0xffff - cur->pfrac)) / 0xffff +
+           (table[next_sample_id(cur)] * cur->pfrac) / 0xffff;
+}
+
+
 static int16_t
 __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ctx_t *ctx)
 {
@@ -78,29 +95,30 @@ __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ct
     // we return a sine (that is already bandlimited by definition) for any high
     // octave without an explicit wavetable.
     if (octave >= wavetable_octaves) {
-        rv = sine_wavetable[p->pint];
+        rv = interpolate_sample(sine_wavetable, p);
     }
     else {
         switch (ctx->_wf) {
         case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE:
-            rv = square_wavetables[octave][p->pint];
+            rv = interpolate_sample(square_wavetables[octave], p);
             break;
 
         case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE:
-            rv = sine_wavetable[p->pint];
+            rv = interpolate_sample(sine_wavetable, p);
             break;
 
         case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_TRIANGLE:
-            rv = triangle_wavetables[octave][p->pint];
+            rv = interpolate_sample(triangle_wavetables[octave], p);
             break;
 
         case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_RIGHT_SAW:
-            rv = -sawtooth_wavetables[octave][p->pint];
+            rv = -interpolate_sample(sawtooth_wavetables[octave], p);
             break;
 
-        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_LEFT_SAW:
-            rv = sawtooth_wavetables[octave][p->pint];
+        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_LEFT_SAW: {
+            rv = interpolate_sample(sawtooth_wavetables[octave], p);
             break;
+        }
 
         default:
             break;
