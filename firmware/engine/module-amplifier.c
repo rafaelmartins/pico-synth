@@ -37,10 +37,14 @@ init(ps_engine_module_amplifier_ctx_t *ctx)
 static int16_t
 __not_in_flash_func(sample)(int16_t in, const ps_engine_phase_t *p, ps_engine_module_amplifier_ctx_t *ctx)
 {
-    if (p == NULL || ctx == NULL || !ctx->_gate)
+    if (p == NULL || ctx == NULL)
         return 0;
 
-    return in * ctx->_gain / 0x7f;
+    mutex_enter_blocking(&ctx->_mtx);
+    int16_t rv = ctx->_gate ? in * ctx->_gain / 0x7f : 0;
+    mutex_exit(&ctx->_mtx);
+
+    return rv;
 }
 
 
