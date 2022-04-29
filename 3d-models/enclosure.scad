@@ -8,8 +8,8 @@ thickness = 1.6;
 width = 100;
 length = 1 + (29.71 + thickness) * 2;
 
-pcb_width = 82.804;
-pcb_length = 55.753;
+pcb_width = 74.549;
+pcb_length = 56.642;
 pcb_thickness = 1.6;
 pcb_screw_padding = 3.56;
 pcb_base_height = 6.5;
@@ -21,7 +21,7 @@ pcb0_y = width - pcb_width - 3;
 
 usb_conn_width = 9.1;
 usb_conn_height = 3.9;
-usb_conn_distance_y = 51.85;
+usb_conn_distance_y = 43.595;
 
 height = thickness + pcb_base_height + pcb_thickness + usb_conn_height + 10;
 
@@ -32,19 +32,19 @@ oled_hole_d = 1.8;
 oled_hole_spacing_x = 30.5;
 oled_hole_spacing_y = 28.5;
 oled0_x = (length - oled_hole_spacing_x) / 2;
-oled0_y = pcb0_y - 7;
+oled0_y = pcb0_y - 15;
 oled_screen_width = 33;
 oled_screen_height = 18;
 oled_screen_distance_x = (oled_hole_spacing_x - oled_screen_width) / 2;
 oled_screen_distance_y = 3.6;
 
-encoder_distance_x = 29.71;
-encoder_distance_y = 34.33;
+encoder_distance_x = 29.711;
+encoder_distance_y = 26.075;
 encoder_d = 7.3;
 
 led_d = 3.2;
 led_distance_x = 13.467;
-led_distance_y = 73.66;
+led_distance_y = 65.405;
 led_spacing = 32.502;
 
 jack_d = 5.8 + 0.7;
