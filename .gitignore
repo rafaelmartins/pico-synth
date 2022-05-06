@@ -15,6 +15,7 @@ _autosave-*
 *.dsn
 *.ses
 *.sch-bak
+*.kicad_prl
 *-cache.lib
 fp-info-cache
 
