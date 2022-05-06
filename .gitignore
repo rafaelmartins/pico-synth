@@ -15,6 +15,7 @@ _autosave-*
 *.dsn
 *.ses
 *.sch-bak
+*-cache.lib
 fp-info-cache
 
 # Gerber
