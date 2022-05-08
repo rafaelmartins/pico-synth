@@ -27,6 +27,12 @@ typedef struct {
     ps_engine_module_filter_sample_func_t sample_func;
 } ps_engine_module_filter_t;
 
+typedef int16_t (*ps_engine_module_sink_sample_func_t)(int16_t *in, uint8_t in_len, void *ctx);
+typedef struct {
+    ps_engine_module_init_func_t init_func;
+    ps_engine_module_sink_sample_func_t sample_func;
+} ps_engine_module_sink_t;
+
 typedef struct {
     const ps_engine_module_source_t *mod;
     void *data;
@@ -39,9 +45,21 @@ typedef struct ps_engine_module_filter_ctx {
 } ps_engine_module_filter_ctx_t;
 
 typedef struct {
+    const ps_engine_module_sink_t *mod;
+    void *data;
+} ps_engine_module_sink_ctx_t;
+
+typedef struct ps_engine_voice {
     ps_engine_phase_t phase;
     ps_engine_module_source_ctx_t *source;
     ps_engine_module_filter_ctx_t *filters;
+    struct ps_engine_voice *next;
+} ps_engine_voice_t;
+
+typedef struct {
+    ps_engine_module_sink_ctx_t *sink;
+    ps_engine_voice_t *voices;
+    uint8_t _num_voices;
 } ps_engine_channel_t;
 
 typedef struct {

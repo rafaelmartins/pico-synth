@@ -6,18 +6,21 @@
 static void
 init_channel(ps_engine_channel_t *chan)
 {
-    if (chan == NULL || chan->source->mod == NULL)
+    if (chan == NULL || chan->sink == NULL || chan->sink->mod == NULL || chan->voices == NULL)
         return;
 
-    if (chan->source->mod->init_func != NULL)
-        chan->source->mod->init_func(chan->source->data);
+    chan->_num_voices = 0;
+    for (ps_engine_voice_t *v = chan->voices; v != NULL; v = v->next, chan->_num_voices++) {
+        if (v->source->mod->init_func != NULL)
+            v->source->mod->init_func(v->source->data);
 
-    for (ps_engine_module_filter_ctx_t *c = chan->filters; c != NULL; c = c->next) {
-        if (c->mod == NULL || c->mod->init_func == NULL)
-            continue;
-
-        c->mod->init_func(c->data);
+        for (ps_engine_module_filter_ctx_t *c = v->filters; c != NULL; c = c->next)
+            if (c->mod != NULL && c->mod->init_func != NULL)
+                c->mod->init_func(c->data);
     }
+
+    if (chan->sink->mod->init_func != NULL)
+        chan->sink->mod->init_func(chan->sink->data);
 }
 
 
@@ -47,18 +50,30 @@ ps_engine_task(ps_engine_t *e)
 static inline uint16_t
 __not_in_flash_func(eval_channel)(ps_engine_channel_t *chan)
 {
-    if (chan == NULL || chan->source->mod == NULL || chan->source->mod->sample_func == NULL)
+    if (chan == NULL || chan->sink == NULL || chan->sink->mod == NULL ||
+            chan->sink->mod->sample_func == NULL || chan->voices == NULL)
         return waveform_amplitude;
 
-    int16_t rv = chan->source->mod->sample_func(&chan->phase, chan->source->data);
+    int16_t in[chan->_num_voices];
+    int8_t i = 0;
 
-    for (ps_engine_module_filter_ctx_t *c = chan->filters; c != NULL; c = c->next) {
-        if (c->mod == NULL || c->mod->sample_func == NULL)
+    for (ps_engine_voice_t *v = chan->voices; v != NULL; v = v->next) {
+        if (v->source->mod == NULL || v->source->mod->sample_func == NULL || i >= chan->_num_voices)
             continue;
 
-        rv = c->mod->sample_func(rv, &chan->phase, c->data);
+        int16_t sample = v->source->mod->sample_func(&v->phase, v->source->data);
+
+        for (ps_engine_module_filter_ctx_t *c = v->filters; c != NULL; c = c->next) {
+            if (c->mod == NULL || c->mod->sample_func == NULL)
+                continue;
+
+            sample = c->mod->sample_func(sample, &v->phase, c->data);
+        }
+
+        in[i++] = sample;
     }
 
+    int16_t rv = chan->sink->mod->sample_func(in, i, chan->sink->data);
     if (rv < -waveform_amplitude)
         return 0;
     if (rv > waveform_amplitude)

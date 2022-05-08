@@ -3,6 +3,7 @@
 #include <pico/time.h>
 #include <pico-synth/engine.h>
 #include <pico-synth/engine/module-amplifier.h>
+#include <pico-synth/engine/module-mixer.h>
 #include <pico-synth/engine/module-oscillator.h>
 #include <pico-synth/midi.h>
 #include <pico-synth/tui.h>
@@ -38,24 +39,63 @@ static ps_tui_t tui = {
 };
 
 static ps_engine_module_oscillator_ctx_t oscillator_ctx1;
-static ps_engine_module_oscillator_ctx_t oscillator_ctx2;
-
 static ps_engine_module_source_ctx_t oscillator_mod_ctx1 = {
     .mod = &ps_engine_module_oscillator,
     .data = &oscillator_ctx1,
 };
+
+static ps_engine_module_oscillator_ctx_t oscillator_ctx2;
 static ps_engine_module_source_ctx_t oscillator_mod_ctx2 = {
     .mod = &ps_engine_module_oscillator,
     .data = &oscillator_ctx2,
 };
 
-static ps_engine_module_amplifier_ctx_t amplifier_ctx1;
+static ps_engine_module_oscillator_ctx_t oscillator_ctx3;
+static ps_engine_module_source_ctx_t oscillator_mod_ctx3 = {
+    .mod = &ps_engine_module_oscillator,
+    .data = &oscillator_ctx3,
+};
 
+static ps_engine_module_amplifier_ctx_t amplifier_ctx1;
 static ps_engine_module_filter_ctx_t amplifier_mod_ctx1 = {
     .mod = &ps_engine_module_amplifier,
     .data = &amplifier_ctx1,
 };
 
+static ps_engine_module_amplifier_ctx_t amplifier_ctx2;
+static ps_engine_module_filter_ctx_t amplifier_mod_ctx2 = {
+    .mod = &ps_engine_module_amplifier,
+    .data = &amplifier_ctx2,
+};
+
+static ps_engine_module_amplifier_ctx_t amplifier_ctx3;
+static ps_engine_module_filter_ctx_t amplifier_mod_ctx3 = {
+    .mod = &ps_engine_module_amplifier,
+    .data = &amplifier_ctx3,
+};
+
+static ps_engine_voice_t voice3 = {
+    .source = &oscillator_mod_ctx3,
+    .filters = &amplifier_mod_ctx3,
+};
+
+static ps_engine_voice_t voice2 = {
+    .source = &oscillator_mod_ctx2,
+    .filters = &amplifier_mod_ctx2,
+    .next = &voice3,
+};
+
+static ps_engine_voice_t voice1 = {
+    .source = &oscillator_mod_ctx1,
+    .filters = &amplifier_mod_ctx1,
+    .next = &voice2,
+};
+
+static ps_engine_module_mixer_ctx_t mixer_ctx;
+static ps_engine_module_sink_ctx_t mixer_mod_ctx = {
+    .mod = &ps_engine_module_mixer,
+    .data = &mixer_ctx,
+};
 
 static ps_engine_t engine = {
     .dac = {
@@ -67,11 +107,8 @@ static ps_engine_t engine = {
 
     .channel = {
         {
-            .source = &oscillator_mod_ctx1,
-            .filters = &amplifier_mod_ctx1,
-        },
-        {
-            .source = &oscillator_mod_ctx2,
+            .sink = &mixer_mod_ctx,
+            .voices = &voice1,
         },
     },
 };
@@ -89,11 +126,11 @@ main1(void)
 {
     hard_assert(ps_engine_init(&engine) == PICO_OK);
 
-    ps_engine_module_oscillator_set_waveform(&oscillator_ctx1, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE);
-    //ps_engine_module_oscillator_set_note(&oscillator_ctx1, 69);
+    ps_engine_module_oscillator_set_waveform(&oscillator_ctx1, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&oscillator_ctx2, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&oscillator_ctx3, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
 
-    ps_engine_module_oscillator_set_waveform(&oscillator_ctx2, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE);
-    //ps_engine_module_oscillator_set_note(&oscillator_ctx2, 69);
+    ps_engine_module_mixer_set_master_gain(&mixer_ctx, 127/3);
 
     while (1) {
         hard_assert(ps_engine_task(&engine) == PICO_OK);
@@ -104,6 +141,9 @@ main1(void)
 void
 ps_midi_channel_cb(ps_midi_command_type_t cmd, uint8_t channel, uint8_t *data, uint8_t data_len)
 {
+    if (channel != 0)
+        return;
+
     switch (cmd) {
     case PS_MIDI_COMMAND_NOTE_ON:
         if (data[1] != 0) {

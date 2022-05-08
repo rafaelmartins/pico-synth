@@ -12,6 +12,9 @@ target_sources(pico_synth_engine INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/module-amplifier.c
     ${CMAKE_CURRENT_LIST_DIR}/include/pico-synth/engine/module-amplifier.h
 
+    ${CMAKE_CURRENT_LIST_DIR}/module-mixer.c
+    ${CMAKE_CURRENT_LIST_DIR}/include/pico-synth/engine/module-mixer.h
+
     ${CMAKE_CURRENT_LIST_DIR}/module-oscillator.c
     ${CMAKE_CURRENT_LIST_DIR}/include/pico-synth/engine/module-oscillator.h
 
