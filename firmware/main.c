@@ -23,9 +23,9 @@ static ps_tui_t tui = {
     },
 
     .encoder = {
-        .button = 9,
-        .a = 10,
-        .b = 11,
+        .button = 6,
+        .a = 8,
+        .b = 7,
         .button_debounce_us = 250000,
         .rotate_debounce_us = 2000,
     },
@@ -61,7 +61,8 @@ static ps_engine_t engine = {
     .dac = {
         .pio = pio0,
         .state_machine = 0,
-        .basepin = 6,
+        .basepin = 10,
+        .with_ldac = true,
     },
 
     .channel = {
