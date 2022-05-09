@@ -9,6 +9,9 @@ pico_sdk_init()
 add_executable(pico-synth
     main.c
 
+    channel.c
+    channel.h
+
     screens.c
     screens.h
 

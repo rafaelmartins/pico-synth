@@ -59,6 +59,8 @@ typedef struct ps_engine_voice {
 typedef struct {
     ps_engine_module_sink_ctx_t *sink;
     ps_engine_voice_t *voices;
+
+    // private
     uint8_t _num_voices;
 } ps_engine_channel_t;
 

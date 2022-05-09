@@ -2,13 +2,11 @@
 #include <pico/multicore.h>
 #include <pico/time.h>
 #include <pico-synth/engine.h>
-#include <pico-synth/engine/module-amplifier.h>
-#include <pico-synth/engine/module-mixer.h>
-#include <pico-synth/engine/module-oscillator.h>
 #include <pico-synth/midi.h>
 #include <pico-synth/tui.h>
 #include "screens.h"
 #include "settings.h"
+#include "channel.h"
 
 static settings_ctx_t settings;
 
@@ -38,65 +36,6 @@ static ps_tui_t tui = {
     .ctx_data = &settings,
 };
 
-static ps_engine_module_oscillator_ctx_t oscillator_ctx1;
-static ps_engine_module_source_ctx_t oscillator_mod_ctx1 = {
-    .mod = &ps_engine_module_oscillator,
-    .data = &oscillator_ctx1,
-};
-
-static ps_engine_module_oscillator_ctx_t oscillator_ctx2;
-static ps_engine_module_source_ctx_t oscillator_mod_ctx2 = {
-    .mod = &ps_engine_module_oscillator,
-    .data = &oscillator_ctx2,
-};
-
-static ps_engine_module_oscillator_ctx_t oscillator_ctx3;
-static ps_engine_module_source_ctx_t oscillator_mod_ctx3 = {
-    .mod = &ps_engine_module_oscillator,
-    .data = &oscillator_ctx3,
-};
-
-static ps_engine_module_amplifier_ctx_t amplifier_ctx1;
-static ps_engine_module_filter_ctx_t amplifier_mod_ctx1 = {
-    .mod = &ps_engine_module_amplifier,
-    .data = &amplifier_ctx1,
-};
-
-static ps_engine_module_amplifier_ctx_t amplifier_ctx2;
-static ps_engine_module_filter_ctx_t amplifier_mod_ctx2 = {
-    .mod = &ps_engine_module_amplifier,
-    .data = &amplifier_ctx2,
-};
-
-static ps_engine_module_amplifier_ctx_t amplifier_ctx3;
-static ps_engine_module_filter_ctx_t amplifier_mod_ctx3 = {
-    .mod = &ps_engine_module_amplifier,
-    .data = &amplifier_ctx3,
-};
-
-static ps_engine_voice_t voice3 = {
-    .source = &oscillator_mod_ctx3,
-    .filters = &amplifier_mod_ctx3,
-};
-
-static ps_engine_voice_t voice2 = {
-    .source = &oscillator_mod_ctx2,
-    .filters = &amplifier_mod_ctx2,
-    .next = &voice3,
-};
-
-static ps_engine_voice_t voice1 = {
-    .source = &oscillator_mod_ctx1,
-    .filters = &amplifier_mod_ctx1,
-    .next = &voice2,
-};
-
-static ps_engine_module_mixer_ctx_t mixer_ctx;
-static ps_engine_module_sink_ctx_t mixer_mod_ctx = {
-    .mod = &ps_engine_module_mixer,
-    .data = &mixer_ctx,
-};
-
 static ps_engine_t engine = {
     .dac = {
         .pio = pio0,
@@ -104,15 +43,7 @@ static ps_engine_t engine = {
         .basepin = 10,
         .with_ldac = true,
     },
-
-    .channel = {
-        {
-            .sink = &mixer_mod_ctx,
-            .voices = &voice1,
-        },
-    },
 };
-
 
 static ps_midi_t midi = {
     .uart = uart1,
@@ -120,17 +51,53 @@ static ps_midi_t midi = {
     .with_usb = true,
 };
 
+static channel_t channels[] = {
+    {
+        .voices = {
+            {
+                .midi_channel = 0,
+            },
+            {
+                .midi_channel = 0,
+            },
+            {
+                .midi_channel = 0,
+            },
+        },
+    },
+    {
+        .voices = {
+            {
+                .midi_channel = 1,
+            },
+            {
+                .midi_channel = 1,
+            },
+            {
+                .midi_channel = 1,
+            },
+        },
+    },
+};
+
 
 static void
 main1(void)
 {
+    channel_init(&channels[0], &engine.channel[0]);
+    channel_init(&channels[1], &engine.channel[1]);
+
     hard_assert(ps_engine_init(&engine) == PICO_OK);
 
-    ps_engine_module_oscillator_set_waveform(&oscillator_ctx1, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
-    ps_engine_module_oscillator_set_waveform(&oscillator_ctx2, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
-    ps_engine_module_oscillator_set_waveform(&oscillator_ctx3, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&channels[0].voices[0].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&channels[0].voices[1].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&channels[0].voices[2].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&channels[1].voices[0].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&channels[1].voices[1].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&channels[1].voices[2].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
 
-    ps_engine_module_mixer_set_master_gain(&mixer_ctx, 127/3);
+    ps_engine_module_mixer_set_master_gain(&channels[0].mixer, 127/3);
+    ps_engine_module_mixer_set_master_gain(&channels[1].mixer, 127/3);
 
     while (1) {
         hard_assert(ps_engine_task(&engine) == PICO_OK);
@@ -141,19 +108,17 @@ main1(void)
 void
 ps_midi_channel_cb(ps_midi_command_type_t cmd, uint8_t channel, uint8_t *data, uint8_t data_len)
 {
-    if (channel != 0)
-        return;
-
     switch (cmd) {
     case PS_MIDI_COMMAND_NOTE_ON:
         if (data[1] != 0) {
-            ps_engine_module_oscillator_set_note(&oscillator_ctx1, data[0]);
-            ps_engine_module_amplifier_set_gate(&amplifier_ctx1, data[1]);
+            channel_set_note(&channels[0], channel, data[0], data[1]);
+            channel_set_note(&channels[1], channel, data[0], data[1]);
             break;
         }
 
     case PS_MIDI_COMMAND_NOTE_OFF:
-        ps_engine_module_amplifier_unset_gate(&amplifier_ctx1);
+        channel_unset_note(&channels[0], channel, data[0]);
+        channel_unset_note(&channels[1], channel, data[0]);
         break;
     }
 }
