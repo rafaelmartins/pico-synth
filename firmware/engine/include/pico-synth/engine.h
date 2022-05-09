@@ -27,7 +27,7 @@ typedef struct {
     ps_engine_module_filter_sample_func_t sample_func;
 } ps_engine_module_filter_t;
 
-typedef int16_t (*ps_engine_module_sink_sample_func_t)(int16_t *in, uint8_t in_len, void *ctx);
+typedef int16_t (*ps_engine_module_sink_sample_func_t)(const int16_t *in, uint8_t in_len, void *ctx);
 typedef struct {
     ps_engine_module_init_func_t init_func;
     ps_engine_module_sink_sample_func_t sample_func;

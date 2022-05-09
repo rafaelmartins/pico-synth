@@ -22,7 +22,7 @@ init(ps_engine_module_mixer_ctx_t *ctx)
 
 
 static int16_t
-__not_in_flash_func(sample)(int16_t *in, uint8_t in_len, ps_engine_module_mixer_ctx_t *ctx)
+__not_in_flash_func(sample)(const int16_t *in, uint8_t in_len, ps_engine_module_mixer_ctx_t *ctx)
 {
     if (in == NULL || in_len == 0 || ctx == NULL)
         return 0;

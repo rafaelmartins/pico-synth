@@ -6,20 +6,26 @@
 static void
 init_channel(ps_engine_channel_t *chan)
 {
-    if (chan == NULL || chan->sink == NULL || chan->sink->mod == NULL || chan->voices == NULL)
+    if (chan == NULL || chan->voices == NULL)
         return;
 
     chan->_num_voices = 0;
-    for (ps_engine_voice_t *v = chan->voices; v != NULL; v = v->next, chan->_num_voices++) {
+    for (ps_engine_voice_t *v = chan->voices; v != NULL; v = v->next) {
         if (v->source->mod->init_func != NULL)
             v->source->mod->init_func(v->source->data);
 
         for (ps_engine_module_filter_ctx_t *c = v->filters; c != NULL; c = c->next)
             if (c->mod != NULL && c->mod->init_func != NULL)
                 c->mod->init_func(c->data);
+
+        chan->_num_voices++;
+
+        // if there's no sink, we can't process more than one voice per channel
+        if (chan->sink == NULL || chan->sink->mod == NULL)
+            break;
     }
 
-    if (chan->sink->mod->init_func != NULL)
+    if (chan->sink != NULL && chan->sink->mod != NULL && chan->sink->mod->init_func != NULL)
         chan->sink->mod->init_func(chan->sink->data);
 }
 
@@ -50,8 +56,7 @@ ps_engine_task(ps_engine_t *e)
 static inline uint16_t
 __not_in_flash_func(eval_channel)(ps_engine_channel_t *chan)
 {
-    if (chan == NULL || chan->sink == NULL || chan->sink->mod == NULL ||
-            chan->sink->mod->sample_func == NULL || chan->voices == NULL)
+    if (chan == NULL || chan->voices == NULL)
         return waveform_amplitude;
 
     int16_t in[chan->_num_voices];
@@ -71,9 +76,18 @@ __not_in_flash_func(eval_channel)(ps_engine_channel_t *chan)
         }
 
         in[i++] = sample;
+
+        // if there's no sink, we can't process more than one voice per channel
+        if (chan->sink == NULL || chan->sink->mod == NULL)
+            break;
     }
 
-    int16_t rv = chan->sink->mod->sample_func(in, i, chan->sink->data);
+    int16_t rv = 0;
+    if (chan->sink != NULL && chan->sink->mod != NULL && chan->sink->mod->sample_func != NULL)
+        rv = chan->sink->mod->sample_func(in, i, chan->sink->data);
+    else if (i > 0)
+        rv = in[0];
+
     if (rv < -waveform_amplitude)
         return 0;
     if (rv > waveform_amplitude)

@@ -111,14 +111,14 @@ ps_midi_channel_cb(ps_midi_command_type_t cmd, uint8_t channel, uint8_t *data, u
     switch (cmd) {
     case PS_MIDI_COMMAND_NOTE_ON:
         if (data[1] != 0) {
-            channel_set_note(&channels[0], channel, data[0], data[1]);
-            channel_set_note(&channels[1], channel, data[0], data[1]);
+            channel_set_note(&channels[0], channel, data[0], data[1]) ||
+                channel_set_note(&channels[1], channel, data[0], data[1]);
             break;
         }
 
     case PS_MIDI_COMMAND_NOTE_OFF:
-        channel_unset_note(&channels[0], channel, data[0]);
-        channel_unset_note(&channels[1], channel, data[0]);
+        channel_unset_note(&channels[0], channel, data[0]) ||
+            channel_unset_note(&channels[1], channel, data[0]);
         break;
     }
 }

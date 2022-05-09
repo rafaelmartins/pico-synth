@@ -28,5 +28,5 @@ typedef struct {
 } channel_t;
 
 void channel_init(channel_t *chan, ps_engine_channel_t *engine_chan);
-void channel_set_note(channel_t *chan, uint8_t midi_ch, uint8_t note, uint8_t velocity);
-void channel_unset_note(channel_t *chan, uint8_t midi_ch, uint8_t note);
+bool channel_set_note(channel_t *chan, uint8_t midi_ch, uint8_t note, uint8_t velocity);
+bool channel_unset_note(channel_t *chan, uint8_t midi_ch, uint8_t note);

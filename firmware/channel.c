@@ -33,7 +33,7 @@ channel_init(channel_t *chan, ps_engine_channel_t *engine_chan)
 }
 
 
-void
+bool
 channel_set_note(channel_t *chan, uint8_t midi_ch, uint8_t note, uint8_t velocity)
 {
     hard_assert(chan);
@@ -45,18 +45,19 @@ channel_set_note(channel_t *chan, uint8_t midi_ch, uint8_t note, uint8_t velocit
             break;
         }
     }
-
     if (v == NULL)
-        return;
+        return false;
 
     ps_engine_module_oscillator_set_note(&v->oscillator, note);
     ps_engine_module_amplifier_set_gate(&v->amplifier, velocity);
     v->running = true;
     v->note = note;
+
+    return true;
 }
 
 
-void
+bool
 channel_unset_note(channel_t *chan, uint8_t midi_ch, uint8_t note)
 {
     hard_assert(chan);
@@ -69,8 +70,10 @@ channel_unset_note(channel_t *chan, uint8_t midi_ch, uint8_t note)
         }
     }
     if (v == NULL)
-        return;
+        return false;
 
     ps_engine_module_amplifier_unset_gate(&v->amplifier);
     v->running = false;
+
+    return true;
 }
