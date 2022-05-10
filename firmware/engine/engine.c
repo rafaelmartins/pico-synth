@@ -35,8 +35,8 @@ ps_engine_init(ps_engine_t *e)
 {
     hard_assert(e);
 
-    init_channel(&e->channel[0]);
-    init_channel(&e->channel[1]);
+    init_channel(&e->channels[0]);
+    init_channel(&e->channels[1]);
 
     mcp4822_init(e);
     return PICO_OK;
@@ -100,5 +100,5 @@ uint32_t
 __not_in_flash_func(mcp4822_callback)(ps_engine_t *e)
 {
     // the caller will ensure that engine is not null
-    return (eval_channel(&e->channel[0]) << 16) | eval_channel(&e->channel[1]);
+    return (eval_channel(&e->channels[0]) << 16) | eval_channel(&e->channels[1]);
 }

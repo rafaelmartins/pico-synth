@@ -72,7 +72,7 @@ typedef struct {
         bool with_ldac;
     } dac;
 
-    ps_engine_channel_t channel[2];
+    ps_engine_channel_t channels[2];
 } ps_engine_t;
 
 const ps_engine_note_t* ps_engine_get_note(uint8_t note);

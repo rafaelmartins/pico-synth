@@ -84,8 +84,8 @@ static channel_t channels[] = {
 static void
 main1(void)
 {
-    channel_init(&channels[0], &engine.channel[0]);
-    channel_init(&channels[1], &engine.channel[1]);
+    channel_init(&channels[0], &engine.channels[0]);
+    channel_init(&channels[1], &engine.channels[1]);
 
     hard_assert(ps_engine_init(&engine) == PICO_OK);
 
