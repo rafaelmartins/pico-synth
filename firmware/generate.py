@@ -194,6 +194,11 @@ generators = {
         }),
         dump_wavetables(),
     ),
+    os.path.join('synth-data.h'): itertools.chain(
+        dump_macros({
+            'cpu_frequency': cpu_frequency // 1000,
+        }),
+    ),
 }
 
 

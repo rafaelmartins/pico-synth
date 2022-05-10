@@ -9,20 +9,20 @@ pico_sdk_init()
 add_executable(pico-synth
     main.c
 
-    channel.c
-    channel.h
-
     screens.c
     screens.h
 
     settings.c
     settings.h
+
+    synth.c
+    synth.h
+    synth-data.h
 )
 
 target_link_libraries(pico-synth PRIVATE
     pico_stdlib
     pico_multicore
-
 
     pico_synth_engine
     pico_synth_midi
