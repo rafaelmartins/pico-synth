@@ -5,24 +5,6 @@
 #include "synth-data.h"
 
 
-static void
-channel_init(synth_channel_t *c, ps_engine_channel_t *ec)
-{
-    if (c == NULL || ec == NULL)
-        return;
-
-    c->oscillator_src.mod = &ps_engine_module_oscillator;
-    c->oscillator_src.data = &c->oscillator;
-    c->amplifier_fltr.mod = &ps_engine_module_amplifier;
-    c->amplifier_fltr.data = &c->amplifier;
-
-    c->voice.source = &c->oscillator_src;
-    c->voice.filters = &c->amplifier_fltr;
-
-    ec->voices = &c->voice;
-}
-
-
 void
 synth_core0(synth_t *s)
 {
@@ -37,6 +19,13 @@ synth_core0(synth_t *s)
     ps_midi_init(&s->midi);
     hard_assert(ps_tui_init(&s->tui) == PICO_OK);
     s->tui.ctx_data = &s->settings;
+
+    for (uint8_t i = 0; i < 2; i++) {
+        if (s->channels[i].with_led) {
+            gpio_init(s->channels[i].led);
+            gpio_set_dir(s->channels[i].led, true);
+        }
+    }
 
     ps_tui_screen_load(&s->tui, &screen_splash);
     sleep_ms(2000);
@@ -54,8 +43,17 @@ synth_core1(synth_t *s)
 {
     hard_assert(s);
 
-    channel_init(&s->channels[0], &s->engine.channels[0]);
-    channel_init(&s->channels[1], &s->engine.channels[1]);
+    for (uint8_t i = 0; i < 2; i++) {
+        s->channels[i].oscillator_src.mod = &ps_engine_module_oscillator;
+        s->channels[i].oscillator_src.data = &s->channels[i].oscillator;
+        s->channels[i].amplifier_fltr.mod = &ps_engine_module_amplifier;
+        s->channels[i].amplifier_fltr.data = &s->channels[i].amplifier;
+
+        s->channels[i].voice.source = &s->channels[i].oscillator_src;
+        s->channels[i].voice.filters = &s->channels[i].amplifier_fltr;
+
+        s->engine.channels[i].voices = &s->channels[i].voice;
+    }
 
     hard_assert(ps_engine_init(&s->engine) == PICO_OK);
 
@@ -85,6 +83,10 @@ channel_set_note(synth_t *s, uint8_t midi_ch, uint8_t note, uint8_t velocity)
 
     ps_engine_module_oscillator_set_note(&c->oscillator, note);
     ps_engine_module_amplifier_set_gate(&c->amplifier, velocity);
+
+    if (c->with_led)
+        gpio_put(c->led, true);
+
     c->running = true;
     c->note = note;
 }
@@ -107,5 +109,9 @@ channel_unset_note(synth_t *s, uint8_t midi_ch, uint8_t note)
         return;
 
     ps_engine_module_amplifier_unset_gate(&c->amplifier);
+
+    if (c->with_led)
+        gpio_put(c->led, false);
+
     c->running = false;
 }

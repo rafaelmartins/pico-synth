@@ -17,9 +17,11 @@ typedef struct {
 
     ps_engine_voice_t voice;
 
+    uint led;
     uint8_t midi_channel;
     uint8_t note;
     bool running;
+    bool with_led;
 } synth_channel_t;
 
 typedef struct {

@@ -48,9 +48,13 @@ static synth_t synth = {
 
     .channels = {
         {
+            .with_led = true,
+            .led = 21,
             .midi_channel = 0,
         },
         {
+            .with_led = true,
+            .led = 20,
             .midi_channel = 0,
         },
     },
