@@ -27,10 +27,10 @@ typedef struct {
 typedef struct {
     struct {
         uart_inst_t *uart;
-        uint tx;
-        uint rx;
-        uint baud_rate;
-    } stdio_uart;
+        uint uart_baud_rate;
+        uint uart_tx;
+        uint uart_rx;
+    } stdio;
 
     ps_engine_t engine;
     ps_midi_t midi;

@@ -2,11 +2,11 @@
 #include "synth.h"
 
 static synth_t synth = {
-    .stdio_uart = {
+    .stdio = {
         .uart = uart0,
-        .baud_rate = 115200,
-        .tx = 16,
-        .rx = 17,
+        .uart_baud_rate = 115200,
+        .uart_tx = 16,
+        .uart_rx = 17,
     },
 
     .engine.dac = {

@@ -12,9 +12,9 @@ synth_core0(synth_t *s)
 
     set_sys_clock_khz(cpu_frequency, true);
 
-    if (s->stdio_uart.uart != NULL)
-        stdio_uart_init_full(s->stdio_uart.uart, s->stdio_uart.baud_rate,
-                             s->stdio_uart.tx, s->stdio_uart.rx);
+    if (s->stdio.uart != NULL)
+        stdio_uart_init_full(s->stdio.uart, s->stdio.uart_baud_rate,
+                             s->stdio.uart_tx, s->stdio.uart_rx);
 
     ps_midi_init(&s->midi);
     hard_assert(ps_tui_init(&s->tui) == PICO_OK);
