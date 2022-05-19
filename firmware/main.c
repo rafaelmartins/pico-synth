@@ -88,6 +88,7 @@ main1(void)
 int
 main(void)
 {
+    synth_init(&synth);
     multicore_launch_core1(main1);
     synth_core0(&synth);
     return 0;

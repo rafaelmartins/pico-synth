@@ -41,6 +41,7 @@ typedef struct {
     synth_channel_t channels[2];
 } synth_t;
 
+void synth_init(synth_t *s);
 void synth_core0(synth_t *s);
 void synth_core1(synth_t *s);
 void channel_set_note(synth_t *s, uint8_t midi_ch, uint8_t note, uint8_t velocity);

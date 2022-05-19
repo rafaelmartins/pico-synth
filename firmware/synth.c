@@ -6,7 +6,7 @@
 
 
 void
-synth_core0(synth_t *s)
+synth_init(synth_t *s)
 {
     hard_assert(s);
 
@@ -26,6 +26,13 @@ synth_core0(synth_t *s)
             gpio_set_dir(s->channels[i].led, true);
         }
     }
+}
+
+
+void
+synth_core0(synth_t *s)
+{
+    hard_assert(s);
 
     ps_tui_screen_load(&s->tui, &screen_splash);
     sleep_ms(2000);
