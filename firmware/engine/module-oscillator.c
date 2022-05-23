@@ -10,8 +10,8 @@ ps_engine_module_oscillator_set_waveform(ps_engine_module_oscillator_ctx_t *ctx,
         return;
 
     mutex_enter_blocking(&ctx->_mtx);
-    ctx->_wf = wf;
-    ctx->_sync = true;
+    ctx->_wf_next = wf;
+    ctx->_wf_set = true;
     mutex_exit(&ctx->_mtx);
 }
 
@@ -23,20 +23,7 @@ ps_engine_module_oscillator_set_note(ps_engine_module_oscillator_ctx_t *ctx, uin
         return;
 
     mutex_enter_blocking(&ctx->_mtx);
-    ctx->_note = ps_engine_get_note(note);
-    ctx->_sync = ctx->_note != NULL;
-    mutex_exit(&ctx->_mtx);
-}
-
-
-void
-ps_engine_module_oscillator_sync(ps_engine_module_oscillator_ctx_t *ctx)
-{
-    if (ctx == NULL)
-        return;
-
-    mutex_enter_blocking(&ctx->_mtx);
-    ctx->_sync = true;
+    ctx->_note_next = ps_engine_get_note(note);
     mutex_exit(&ctx->_mtx);
 }
 
@@ -69,15 +56,22 @@ __not_in_flash_func(interpolate_sample)(const int16_t *table, const ps_engine_ph
 static int16_t
 __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ctx_t *ctx)
 {
-    if (p == NULL || ctx == NULL || ctx->_note == NULL)
+    if (p == NULL || ctx == NULL)
         return 0;
 
     mutex_enter_blocking(&ctx->_mtx);
 
-    if (ctx->_sync) {
+    if (ctx->_note == NULL) {  // not running
+        if (ctx->_note_next == NULL || !ctx->_wf_set) {  // no note to play yet
+            mutex_exit(&ctx->_mtx);
+            return 0;
+        }
+        ctx->_note = ctx->_note_next;
+        ctx->_note_next = NULL;
+        ctx->_wf = ctx->_wf_next;
+        ctx->_wf_set = false;
         p->pint = 0;
         p->pfrac = 0;
-        ctx->_sync = false;
     }
     else {
         uint16_t pfrac = p->pfrac;
@@ -85,8 +79,17 @@ __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ct
         p->pfrac += ctx->_note->step.pfrac;
         if (p->pfrac < pfrac)
             p->pint++;
-        if (p->pint >= waveform_samples_per_cycle)
+        if (p->pint >= waveform_samples_per_cycle) {
             p->pint -= waveform_samples_per_cycle;
+            if (ctx->_note_next != NULL) {  // new note to play
+                ctx->_note = ctx->_note_next;
+                ctx->_note_next = NULL;
+            }
+            if (ctx->_wf_set) {  // new waveform to set
+                ctx->_wf = ctx->_wf_next;
+                ctx->_wf_set = false;
+            }
+        }
     }
 
     int16_t rv = 0;
@@ -115,10 +118,9 @@ __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ct
             rv = -interpolate_sample(sawtooth_wavetables[octave], p);
             break;
 
-        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_LEFT_SAW: {
+        case PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_LEFT_SAW:
             rv = interpolate_sample(sawtooth_wavetables[octave], p);
             break;
-        }
 
         default:
             break;
