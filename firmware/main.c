@@ -74,6 +74,15 @@ ps_midi_channel_cb(ps_midi_command_type_t cmd, uint8_t channel, uint8_t *data, u
     case PS_MIDI_COMMAND_NOTE_OFF:
         channel_unset_note(&synth, channel , data[0]);
         break;
+
+    case PS_MIDI_COMMAND_POLYPHONIC_PRESSURE:
+    case PS_MIDI_COMMAND_CONTROL_CHANGE:
+    case PS_MIDI_COMMAND_PROGRAM_CHANGE:
+    case PS_MIDI_COMMAND_CHANNEL_PRESSURE:
+    case PS_MIDI_COMMAND_PITCH_BEND:
+    case PS_MIDI_COMMAND_SYSTEM:
+    case PS_MIDI_COMMAND_UNSET:
+        break;
     }
 }
 
