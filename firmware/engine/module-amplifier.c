@@ -8,8 +8,20 @@ ps_engine_module_amplifier_set_gate(ps_engine_module_amplifier_ctx_t *ctx, uint8
         return;
 
     mutex_enter_blocking(&ctx->_mtx);
-    ctx->_gain = gain;
-    ctx->_gate = true;
+    switch (ctx->_gate) {
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_OFF:
+        ctx->_gain_next = gain;
+        ctx->_gate = PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_ON;
+        break;
+
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_ON:
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_OFF:
+        ctx->_gate = PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_CHANGE_GAIN;
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_ON:
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_CHANGE_GAIN:
+        ctx->_gain_next = gain;
+        break;
+    }
     mutex_exit(&ctx->_mtx);
 }
 
@@ -21,7 +33,20 @@ ps_engine_module_amplifier_unset_gate(ps_engine_module_amplifier_ctx_t *ctx)
         return;
 
     mutex_enter_blocking(&ctx->_mtx);
-    ctx->_gate = false;
+    switch (ctx->_gate) {
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_OFF:
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_OFF:
+        break;
+
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_ON:
+        ctx->_gate = PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_OFF;
+        break;
+
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_ON:
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_CHANGE_GAIN:
+        ctx->_gate = PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_OFF;
+        break;
+    }
     mutex_exit(&ctx->_mtx);
 }
 
@@ -41,7 +66,40 @@ __not_in_flash_func(sample)(int16_t in, const ps_engine_phase_t *p, ps_engine_mo
         return 0;
 
     mutex_enter_blocking(&ctx->_mtx);
-    int16_t rv = ctx->_gate ? in * ctx->_gain / 0x7f : 0;
+
+    if ((p->pint == 0 && p->pfrac == 0) || (p->pint < ctx->_pint)) {  // phase ~0
+        switch (ctx->_gate) {
+        case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_ON:
+        case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_CHANGE_GAIN:
+            ctx->_gain = ctx->_gain_next;
+            ctx->_gate = PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_ON;
+            break;
+
+        case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_OFF:
+            ctx->_gate = PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_OFF;
+            break;
+
+        case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_ON:
+        case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_OFF:
+            break;
+        }
+    }
+
+    int16_t rv = 0;
+
+    switch (ctx->_gate) {
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_OFF:
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_ON:
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_CHANGE_GAIN:
+        rv = in * ctx->_gain / 0x7f;
+        break;
+
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_TO_ON:
+    case PS_ENGINE_MODULE_AMPLIFIER_GATE_STATE_OFF:
+        break;
+    }
+
+    ctx->_pint = p->pint;
     mutex_exit(&ctx->_mtx);
 
     return rv;
