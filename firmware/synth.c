@@ -64,8 +64,8 @@ synth_core1(synth_t *s)
 
     hard_assert(ps_engine_init(&s->engine) == PICO_OK);
 
-    ps_engine_module_oscillator_set_waveform(&s->channels[0].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
-    ps_engine_module_oscillator_set_waveform(&s->channels[1].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SQUARE);
+    ps_engine_module_oscillator_set_waveform(&s->channels[0].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE);
+    ps_engine_module_oscillator_set_waveform(&s->channels[1].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE);
 
     while (1)
         hard_assert(ps_engine_task(&s->engine) == PICO_OK);

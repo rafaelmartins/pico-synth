@@ -1,6 +1,8 @@
 #include <pico/stdlib.h>
 #include <pico/unique_id.h>
 #include <tusb.h>
+#include <pico-synth/midi.h>
+#include "driver-usb.h"
 
 // we use tinyusb descriptor structs as much as possible. see inline comments
 // for details on why we had to define some custom structs.
@@ -223,4 +225,32 @@ tud_descriptor_string_cb(uint8_t index, uint16_t langid)
     }
 
     return (const uint16_t*) rv;
+}
+
+
+void
+midi_usb_init(ps_midi_t *m)
+{
+    if (m == NULL || !m->enable_usb)
+        return;
+
+    tusb_init();
+}
+
+
+uint32_t
+midi_usb_read(ps_midi_t *m, uint8_t *data, uint32_t data_len)
+{
+    if (m == NULL || !m->enable_usb)
+        return 0;
+
+    tud_task();
+
+    if (data == NULL || data_len == 0)
+        return 0;
+
+    if (tud_midi_available())
+        return tud_midi_stream_read(data, data_len);
+
+    return 0;
 }

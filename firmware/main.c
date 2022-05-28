@@ -17,9 +17,11 @@ static synth_t synth = {
     },
 
     .midi = {
-        .uart = uart1,
-        .uart_rx = 5,
-        .with_usb = true,
+        .uart = {
+            .uart = uart1,
+            .uart_rx = 5,
+        },
+        .enable_usb = true,
     },
 
     .tui = {
@@ -62,26 +64,33 @@ static synth_t synth = {
 
 
 void
-ps_midi_channel_cb(ps_midi_command_type_t cmd, uint8_t channel, uint8_t *data, uint8_t data_len)
+ps_midi_message_cb(const ps_midi_message_t *msg)
 {
-    switch (cmd) {
-    case PS_MIDI_COMMAND_NOTE_ON:
-        if (data[1] != 0) {
-            channel_set_note(&synth, channel, data[0], data[1]);
+    switch (msg->group) {
+    case PS_MIDI_MESSAGE_GROUP_CHANNEL:
+        switch (msg->message.channel.type) {
+        case PS_MIDI_MESSAGE_TYPE_CHANNEL_NOTE_ON:
+            if (msg->message.channel.data[1] != 0) {
+                channel_set_note(&synth, msg->message.channel.channel, msg->message.channel.data[0], msg->message.channel.data[1]);
+                break;
+            }
+
+        case PS_MIDI_MESSAGE_TYPE_CHANNEL_NOTE_OFF:
+            channel_unset_note(&synth, msg->message.channel.channel , msg->message.channel.data[0]);
+            break;
+
+        case PS_MIDI_MESSAGE_TYPE_CHANNEL_POLYPHONIC_PRESSURE:
+        case PS_MIDI_MESSAGE_TYPE_CHANNEL_CONTROL_CHANGE:
+        case PS_MIDI_MESSAGE_TYPE_CHANNEL_PROGRAM_CHANGE:
+        case PS_MIDI_MESSAGE_TYPE_CHANNEL_CHANNEL_PRESSURE:
+        case PS_MIDI_MESSAGE_TYPE_CHANNEL_PITCH_BEND:
             break;
         }
-
-    case PS_MIDI_COMMAND_NOTE_OFF:
-        channel_unset_note(&synth, channel , data[0]);
         break;
 
-    case PS_MIDI_COMMAND_POLYPHONIC_PRESSURE:
-    case PS_MIDI_COMMAND_CONTROL_CHANGE:
-    case PS_MIDI_COMMAND_PROGRAM_CHANGE:
-    case PS_MIDI_COMMAND_CHANNEL_PRESSURE:
-    case PS_MIDI_COMMAND_PITCH_BEND:
-    case PS_MIDI_COMMAND_SYSTEM:
-    case PS_MIDI_COMMAND_UNSET:
+    case PS_MIDI_MESSAGE_GROUP_SYSTEM:
+    case PS_MIDI_MESSAGE_GROUP_SYSTEM_RT:
+    case PS_MIDI_MESSAGE_GROUP_SYSEX:
         break;
     }
 }
