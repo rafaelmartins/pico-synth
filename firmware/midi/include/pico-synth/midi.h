@@ -79,7 +79,15 @@ typedef struct {
         uart_inst_t *uart;
         uint uart_rx;
     } uart;
-    bool enable_usb;
+
+    struct {
+        bool enable;
+        const char *product;
+        const char *manufacturer;
+        uint16_t pid;
+        uint16_t vid;
+        uint16_t version;
+    } usb;
 
     // private
     mutex_t _mtx;

@@ -21,7 +21,11 @@ static synth_t synth = {
             .uart = uart1,
             .uart_rx = 5,
         },
-        .enable_usb = true,
+        .usb = {
+            .enable = true,
+            .version = 0x0100,
+            .product = "pico-synth",
+        },
     },
 
     .tui = {

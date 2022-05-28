@@ -7,7 +7,7 @@
 // we use tinyusb descriptor structs as much as possible. see inline comments
 // for details on why we had to define some custom structs.
 
-static const tusb_desc_device_t device_descriptor = {
+static tusb_desc_device_t device_descriptor = {
     .bLength = sizeof(tusb_desc_device_t),
     .bDescriptorType = TUSB_DESC_DEVICE,
     .bcdUSB = 0x0200,
@@ -15,9 +15,9 @@ static const tusb_desc_device_t device_descriptor = {
     .bDeviceSubClass = 0x00,
     .bDeviceProtocol = 0x00,
     .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
-    .idVendor = 0x16c0, // free from v-usb
-    .idProduct = 0x05dc, // free from v-usb
-    .bcdDevice = 0x0100,
+    .idVendor = 0x16c0,  // default vid, free from v-usb
+    .idProduct = 0x05dc, // default pid, free from v-usb
+    .bcdDevice = 0x0000,
     .iManufacturer = 0x01,
     .iProduct = 0x02,
     .iSerialNumber = 0x03,
@@ -169,20 +169,20 @@ tud_descriptor_configuration_cb(uint8_t index)
 
 
 static const tusb_desc_string_t lang = {
-    .bLength = sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t),
+    .bLength = 2 * sizeof(uint8_t) + sizeof(uint16_t),
     .bDescriptorType = TUSB_DESC_STRING,
     .unicode_string = {0x0409},
 };
 
 #define MANUFACTURER u"rgm.io"
-static const tusb_desc_string_t manufacturer = {
+static tusb_desc_string_t default_manufacturer = {
     .bLength = sizeof(MANUFACTURER),
     .bDescriptorType = TUSB_DESC_STRING,
     .unicode_string = MANUFACTURER,
 };
 
-#define PRODUCT u"pico-synth"
-static const tusb_desc_string_t product = {
+#define PRODUCT u"pico-synth midi library"
+static tusb_desc_string_t default_product = {
     .bLength = sizeof(PRODUCT),
     .bDescriptorType = TUSB_DESC_STRING,
     .unicode_string = PRODUCT,
@@ -191,11 +191,16 @@ static const tusb_desc_string_t product = {
 static struct TU_ATTR_PACKED {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    uint16_t unicode_string[PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2];
-} serial = {
-    .bLength = sizeof(serial),
-    .bDescriptorType = TUSB_DESC_STRING,
-};
+    uint16_t unicode_string[0xff];
+} string_descriptors[3];
+
+static const uint8_t*
+get_string_descriptor(uint8_t idx, tusb_desc_string_t *def)
+{
+    if (string_descriptors[idx - 1].bLength != 0)
+        return (const uint8_t*) &string_descriptors[idx - 1];
+    return (const uint8_t*) def;
+}
 
 const uint16_t*
 tud_descriptor_string_cb(uint8_t index, uint16_t langid)
@@ -207,20 +212,13 @@ tud_descriptor_string_cb(uint8_t index, uint16_t langid)
         rv = (const uint8_t*) &lang;
         break;
     case 1:
-        rv = (const uint8_t*) &manufacturer;
+        rv = get_string_descriptor(index, &default_manufacturer);
         break;
     case 2:
-        // FIXME: allow to configure the product name
-        rv = (const uint8_t*) &product;
+        rv = get_string_descriptor(index, &default_product);
         break;
     case 3:
-        if (serial.unicode_string[0] == 0) {
-            char serial_str[PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2];
-            pico_get_unique_board_id_string(serial_str, sizeof(serial_str));
-            for (size_t i = 0; serial_str[i] != 0; i++)
-                serial.unicode_string[i] = serial_str[i];
-        }
-        rv = (const uint8_t*) &serial;
+        rv = get_string_descriptor(index, NULL);
         break;
     }
 
@@ -228,11 +226,39 @@ tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 }
 
 
+static void
+set_string_descriptor(uint8_t idx, const char *str)
+{
+    string_descriptors[idx].bLength = 2 * sizeof(uint8_t) + sizeof(uint16_t) * strlen(str);
+    string_descriptors[idx].bDescriptorType = TUSB_DESC_STRING;
+    for (uint8_t i = 0; str[i] != 0; i++)
+        string_descriptors[idx].unicode_string[i] = str[i];
+}
+
 void
 midi_usb_init(ps_midi_t *m)
 {
-    if (m == NULL || !m->enable_usb)
+    if (m == NULL || !m->usb.enable)
         return;
+
+    if (m->usb.vid != 0)
+        device_descriptor.idVendor = m->usb.vid;
+
+    if (m->usb.pid != 0)
+        device_descriptor.idProduct = m->usb.pid;
+
+    if (m->usb.version != 0)
+        device_descriptor.bcdDevice = m->usb.version;
+
+    if (m->usb.manufacturer != NULL)
+        set_string_descriptor(0, m->usb.manufacturer);
+
+    if (m->usb.product != NULL)
+        set_string_descriptor(1, m->usb.product);
+
+    char serial_str[PICO_UNIQUE_BOARD_ID_SIZE_BYTES * sizeof(uint16_t)];
+    pico_get_unique_board_id_string(serial_str, sizeof(serial_str));
+    set_string_descriptor(2, serial_str);
 
     tusb_init();
 }
@@ -241,7 +267,7 @@ midi_usb_init(ps_midi_t *m)
 uint32_t
 midi_usb_read(ps_midi_t *m, uint8_t *data, uint32_t data_len)
 {
-    if (m == NULL || !m->enable_usb)
+    if (m == NULL || !m->usb.enable)
         return 0;
 
     tud_task();
