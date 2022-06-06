@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021-2022 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+# SPDX-License-Identifier: BSD-3-Clause
+
 add_library(pico_synth_tui INTERFACE)
 
 target_sources(pico_synth_tui INTERFACE
