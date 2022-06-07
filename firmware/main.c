@@ -28,8 +28,11 @@ static synth_t synth = {
             .uart = uart1,
             .uart_rx = 5,
         },
+
         .usb = {
             .enable = true,
+            .vid = 0x1d50,  // OpenMoko, Inc.
+            .pid = 0x6179,  // pico-synth
             .version = 0x0100,
             .product = "pico-synth",
         },
