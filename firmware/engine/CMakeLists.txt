@@ -23,6 +23,8 @@ target_sources(pico_synth_engine INTERFACE
 
     ${CMAKE_CURRENT_LIST_DIR}/note.c
     ${CMAKE_CURRENT_LIST_DIR}/note-data.h
+
+    ${CMAKE_CURRENT_LIST_DIR}/phase.c
 )
 
 pico_generate_pio_header(pico_synth_engine

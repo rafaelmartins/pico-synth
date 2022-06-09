@@ -9,9 +9,20 @@
 
 #include <hardware/pio.h>
 
-typedef struct {
-    uint16_t pint;
-    uint16_t pfrac;
+typedef union {
+    uint32_t data;
+
+    struct __attribute__((packed)) {
+#ifdef __ARMEB__
+        // I don't think that this is really needed for rp2040 or any upcoming
+        // raspberry pi silicon, but why not!?
+        uint16_t pint;
+        uint16_t pfrac;
+#else
+        uint16_t pfrac;
+        uint16_t pint;
+#endif
+    };
 } ps_engine_phase_t;
 
 typedef struct {
@@ -84,6 +95,10 @@ typedef struct {
 
 const ps_engine_note_t* ps_engine_get_note(uint8_t note);
 const char* ps_engine_get_note_name(uint8_t note);
+
+void ps_engine_phase_reset(ps_engine_phase_t *phase);
+bool ps_engine_phase_step(ps_engine_phase_t *phase, const ps_engine_phase_t *step, uint16_t table_len);
+uint16_t ps_engine_phase_next_pint(const ps_engine_phase_t *phase, uint16_t table_len);
 
 int ps_engine_init(ps_engine_t *e);
 int ps_engine_task(ps_engine_t *e);

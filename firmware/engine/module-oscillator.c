@@ -43,20 +43,11 @@ init(ps_engine_module_oscillator_ctx_t *ctx)
 }
 
 
-static inline uint16_t
-__not_in_flash_func(next_sample_id)(const ps_engine_phase_t *cur)
-{
-    if (cur->pint + 1 == waveform_samples_per_cycle)
-        return cur->pint - waveform_samples_per_cycle + 1;
-    return cur->pint + 1;
-}
-
-
 static inline int16_t
 __not_in_flash_func(interpolate_sample)(const int16_t *table, const ps_engine_phase_t *cur)
 {
     return (table[cur->pint] * (0xffff - cur->pfrac)) / 0xffff +
-           (table[next_sample_id(cur)] * cur->pfrac) / 0xffff;
+           (table[ps_engine_phase_next_pint(cur, waveform_samples_per_cycle)] * cur->pfrac) / 0xffff;
 }
 
 
@@ -77,25 +68,16 @@ __not_in_flash_func(sample)(ps_engine_phase_t *p, ps_engine_module_oscillator_ct
         ctx->_note_next = NULL;
         ctx->_wf = ctx->_wf_next;
         ctx->_wf_set = false;
-        p->pint = 0;
-        p->pfrac = 0;
+        ps_engine_phase_reset(p);
     }
-    else {
-        uint16_t pfrac = p->pfrac;
-        p->pint += ctx->_note->step.pint;
-        p->pfrac += ctx->_note->step.pfrac;
-        if (p->pfrac < pfrac)
-            p->pint++;
-        if (p->pint >= waveform_samples_per_cycle) {
-            p->pint -= waveform_samples_per_cycle;
-            if (ctx->_note_next != NULL) {  // new note to play
-                ctx->_note = ctx->_note_next;
-                ctx->_note_next = NULL;
-            }
-            if (ctx->_wf_set) {  // new waveform to set
-                ctx->_wf = ctx->_wf_next;
-                ctx->_wf_set = false;
-            }
+    else if (ps_engine_phase_step(p, &ctx->_note->step, waveform_samples_per_cycle)) {
+        if (ctx->_note_next != NULL) {  // new note to play
+            ctx->_note = ctx->_note_next;
+            ctx->_note_next = NULL;
+        }
+        if (ctx->_wf_set) {  // new waveform to set
+            ctx->_wf = ctx->_wf_next;
+            ctx->_wf_set = false;
         }
     }
 

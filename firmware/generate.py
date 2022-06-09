@@ -143,12 +143,9 @@ def dump_notes():
     for i, f in enumerate(note_frequencies):
         step = waveform_samples_per_cycle / (audio_sample_rate / f)
         yield '    {'
-        yield '        .id   = %d,' % i
-        yield '        .name = "%s%d",' % (note_prefixes[i % 12], (i // 12) - 1)
-        yield '        .step = {'
-        yield '            .pint  = %s,' % format_hex(step)
-        yield '            .pfrac = %s,' % format_hex((step - float(int(step))) * (1 << 16))
-        yield '        },'
+        yield '        .id        = %d,' % i
+        yield '        .name      = "%s%d",' % (note_prefixes[i % 12], (i // 12) - 1)
+        yield '        .step.data = %s,' % format_hex(step * (1 << 16), 8)
         yield '    },'
 
     yield '};'
