@@ -12,6 +12,10 @@ target_sources(pico_synth_engine INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/driver-mcp4822.h
     ${CMAKE_CURRENT_LIST_DIR}/driver-mcp4822-data.h
 
+    ${CMAKE_CURRENT_LIST_DIR}/module-adsr.c
+    ${CMAKE_CURRENT_LIST_DIR}/module-adsr-data.h
+    ${CMAKE_CURRENT_LIST_DIR}/include/pico-synth/engine/module-adsr.h
+
     ${CMAKE_CURRENT_LIST_DIR}/module-amplifier.c
     ${CMAKE_CURRENT_LIST_DIR}/include/pico-synth/engine/module-amplifier.h
 

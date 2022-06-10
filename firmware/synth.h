@@ -9,6 +9,7 @@
 
 #include <hardware/uart.h>
 #include <pico-synth/engine.h>
+#include <pico-synth/engine/module-adsr.h>
 #include <pico-synth/engine/module-amplifier.h>
 #include <pico-synth/engine/module-oscillator.h>
 #include <pico-synth/midi.h>
@@ -21,6 +22,9 @@ typedef struct {
 
     ps_engine_module_amplifier_ctx_t amplifier;
     ps_engine_module_filter_ctx_t amplifier_fltr;
+
+    ps_engine_module_adsr_ctx_t adsr;
+    ps_engine_module_filter_ctx_t adsr_fltr;
 
     ps_engine_voice_t voice;
 
