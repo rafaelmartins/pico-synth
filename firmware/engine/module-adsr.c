@@ -160,8 +160,11 @@ __not_in_flash_func(sample)(int16_t in, const ps_engine_phase_t *p, ps_engine_mo
         break;
 
     case PS_ENGINE_MODULE_ADSR_STATE_RELEASE:
-        if (ps_engine_phase_step(&ctx->_phase, &times[ctx->_release].step, adsr_samples_per_cycle))
+        if (ps_engine_phase_step(&ctx->_phase, &times[ctx->_release].step, adsr_samples_per_cycle)) {
             set_state(ctx, PS_ENGINE_MODULE_ADSR_STATE_OFF);
+            mutex_exit(&ctx->_mtx);
+            return 0;
+        }
         table = decay_release_curve;
         break;
 
