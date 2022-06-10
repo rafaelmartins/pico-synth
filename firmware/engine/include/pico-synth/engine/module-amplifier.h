@@ -8,7 +8,6 @@
 #pragma once
 
 #include <pico/mutex.h>
-#include <stdbool.h>
 #include <pico-synth/engine.h>
 
 typedef enum {
