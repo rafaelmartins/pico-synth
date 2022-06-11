@@ -21,7 +21,7 @@ static const ps_tui_screen_lines_t screen_splash_lines = {
 
 const ps_tui_screen_t screen_splash = {
     .type = PS_TUI_SCREEN_LINES,
-    .screen.lines = &screen_splash_lines,
+    .lines = &screen_splash_lines,
 };
 
 
@@ -50,7 +50,7 @@ static const ps_tui_screen_callback_t screen_main_callback = {
 
 const ps_tui_screen_t screen_main = {
     .type = PS_TUI_SCREEN_CALLBACK,
-    .screen.callback = &screen_main_callback,
+    .callback = &screen_main_callback,
 };
 
 
@@ -63,14 +63,14 @@ static const ps_tui_screen_menu_t screen_settings_menu = {
             .content = "Voices",
             .action = {
                 .type = PS_TUI_SCREEN_ACTION_NEXT,
-                .action.next = &screen_voice_select,
+                .next = &screen_voice_select,
             },
         },
         {
             .content = "... Back",
             .action = {
                 .type = PS_TUI_SCREEN_ACTION_NEXT,
-                .action.next = &screen_main,
+                .next = &screen_main,
             },
         },
     },
@@ -79,7 +79,7 @@ static const ps_tui_screen_menu_t screen_settings_menu = {
 
 const ps_tui_screen_t screen_settings = {
     .type = PS_TUI_SCREEN_MENU,
-    .screen.menu = &screen_settings_menu,
+    .menu = &screen_settings_menu,
 };
 
 
@@ -112,21 +112,21 @@ static const ps_tui_screen_menu_t screen_voice_select_menu = {
             .content = "Voice 1",
             .action = {
                 .type = PS_TUI_SCREEN_ACTION_CALLBACK,
-                .action.callback = screen_voice_select_1_cb,
+                .callback = screen_voice_select_1_cb,
             },
         },
         {
             .content = "Voice 2",
             .action = {
                 .type = PS_TUI_SCREEN_ACTION_CALLBACK,
-                .action.callback = screen_voice_select_2_cb,
+                .callback = screen_voice_select_2_cb,
             },
         },
         {
             .content = "... Back",
             .action = {
                 .type = PS_TUI_SCREEN_ACTION_NEXT,
-                .action.next = &screen_settings,
+                .next = &screen_settings,
             },
         },
     },
@@ -135,7 +135,7 @@ static const ps_tui_screen_menu_t screen_voice_select_menu = {
 
 const ps_tui_screen_t screen_voice_select = {
     .type = PS_TUI_SCREEN_MENU,
-    .screen.menu = &screen_voice_select_menu,
+    .menu = &screen_voice_select_menu,
 };
 
 
@@ -161,7 +161,7 @@ static const ps_tui_screen_menu_t screen_voice_menu = {
             .content = "... Back",
             .action = {
                 .type = PS_TUI_SCREEN_ACTION_NEXT,
-                .action.next = &screen_voice_select,
+                .next = &screen_voice_select,
             },
         },
     },
@@ -170,5 +170,5 @@ static const ps_tui_screen_menu_t screen_voice_menu = {
 
 const ps_tui_screen_t screen_voice = {
     .type = PS_TUI_SCREEN_MENU,
-    .screen.menu = &screen_voice_menu,
+    .menu = &screen_voice_menu,
 };

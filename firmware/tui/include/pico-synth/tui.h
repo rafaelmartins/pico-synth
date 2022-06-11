@@ -99,7 +99,7 @@ typedef struct {
     union {
         ps_tui_screen_action_callback_t callback;
         const struct ps_tui_screen *next;
-    } action;
+    };
 } ps_tui_screen_action_t;
 
 typedef struct {
@@ -138,7 +138,7 @@ typedef struct ps_tui_screen {
         const ps_tui_screen_callback_t *callback;
         const ps_tui_screen_menu_t *menu;
         const ps_tui_screen_lines_t *lines;
-    } screen;
+    };
 } ps_tui_screen_t;
 
 int ps_tui_init(ps_tui_t *tui);

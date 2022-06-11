@@ -24,12 +24,12 @@ run_action(ps_tui_t *tui, const ps_tui_screen_action_t *act)
 
     switch (act->type) {
     case PS_TUI_SCREEN_ACTION_CALLBACK:
-        if (act->action.callback != NULL)
-            act->action.callback(tui);
+        if (act->callback != NULL)
+            act->callback(tui);
         break;
 
     case PS_TUI_SCREEN_ACTION_NEXT:
-        ps_tui_screen_load(tui, act->action.next);
+        ps_tui_screen_load(tui, act->next);
         break;
     }
 }
@@ -128,17 +128,17 @@ ec11_callback(ps_tui_t *tui, ps_tui_encoder_action_t act)
 
     switch (tui->_current_screen->type) {
     case PS_TUI_SCREEN_CALLBACK:
-        if (tui->_current_screen->screen.callback != NULL && tui->_current_screen->screen.callback->encoder_callback != NULL)
-            tui->_current_screen->screen.callback->encoder_callback(tui, act);
+        if (tui->_current_screen->callback != NULL && tui->_current_screen->callback->encoder_callback != NULL)
+            tui->_current_screen->callback->encoder_callback(tui, act);
         break;
 
     case PS_TUI_SCREEN_MENU:
-        menu_callback(tui, tui->_current_screen->screen.menu, act);
+        menu_callback(tui, tui->_current_screen->menu, act);
         break;
 
     case PS_TUI_SCREEN_LINES:
-        if (tui->_current_screen->screen.lines != NULL && act == PS_TUI_ENCODER_ACTION_BUTTON)
-            run_action(tui, &tui->_current_screen->screen.lines->action);
+        if (tui->_current_screen->lines != NULL && act == PS_TUI_ENCODER_ACTION_BUTTON)
+            run_action(tui, &tui->_current_screen->lines->action);
         break;
     }
 }
@@ -153,40 +153,40 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
 
     switch (screen->type) {
     case PS_TUI_SCREEN_CALLBACK:
-        if (screen->screen.callback == NULL || screen->screen.callback->render_callback == NULL)
+        if (screen->callback == NULL || screen->callback->render_callback == NULL)
             return PICO_OK;
 
-        screen->screen.callback->render_callback(tui);
+        screen->callback->render_callback(tui);
         break;
 
     case PS_TUI_SCREEN_MENU:
-        if (screen->screen.menu == NULL)
+        if (screen->menu == NULL)
             return PICO_OK;
 
         ps_tui_oled_clear(tui);
-        ps_tui_oled_line(tui, 0, line_get(tui, &screen->screen.menu->title), PS_TUI_OLED_HALIGN_CENTER);
+        ps_tui_oled_line(tui, 0, line_get(tui, &screen->menu->title), PS_TUI_OLED_HALIGN_CENTER);
         tui->_selected_line = 0;
         tui->_selected = 0;
-        for (uint8_t i = 0; i < (screen->screen.menu->num_items > 6 ? 6 : screen->screen.menu->num_items); i++) {
+        for (uint8_t i = 0; i < (screen->menu->num_items > 6 ? 6 : screen->menu->num_items); i++) {
             char *b = i == tui->_selected ? buf_selected : buf_unselected;
-            memcpy(b + 2, screen->screen.menu->items[i].content, sizeof(screen->screen.menu->items[i].content));
+            memcpy(b + 2, screen->menu->items[i].content, sizeof(screen->menu->items[i].content));
             ps_tui_oled_line(tui, i + 2, b, PS_TUI_OLED_HALIGN_LEFT);
             b[2] = 0;
         }
         break;
 
     case PS_TUI_SCREEN_LINES:
-        if (screen->screen.lines == NULL)
+        if (screen->lines == NULL)
             return PICO_OK;
 
-        ps_tui_oled_line(tui, 0, line_get(tui, &screen->screen.lines->line0), screen->screen.lines->line0.align);
-        ps_tui_oled_line(tui, 1, line_get(tui, &screen->screen.lines->line1), screen->screen.lines->line1.align);
-        ps_tui_oled_line(tui, 2, line_get(tui, &screen->screen.lines->line2), screen->screen.lines->line2.align);
-        ps_tui_oled_line(tui, 3, line_get(tui, &screen->screen.lines->line3), screen->screen.lines->line3.align);
-        ps_tui_oled_line(tui, 4, line_get(tui, &screen->screen.lines->line4), screen->screen.lines->line4.align);
-        ps_tui_oled_line(tui, 5, line_get(tui, &screen->screen.lines->line5), screen->screen.lines->line5.align);
-        ps_tui_oled_line(tui, 6, line_get(tui, &screen->screen.lines->line6), screen->screen.lines->line6.align);
-        ps_tui_oled_line(tui, 7, line_get(tui, &screen->screen.lines->line7), screen->screen.lines->line7.align);
+        ps_tui_oled_line(tui, 0, line_get(tui, &screen->lines->line0), screen->lines->line0.align);
+        ps_tui_oled_line(tui, 1, line_get(tui, &screen->lines->line1), screen->lines->line1.align);
+        ps_tui_oled_line(tui, 2, line_get(tui, &screen->lines->line2), screen->lines->line2.align);
+        ps_tui_oled_line(tui, 3, line_get(tui, &screen->lines->line3), screen->lines->line3.align);
+        ps_tui_oled_line(tui, 4, line_get(tui, &screen->lines->line4), screen->lines->line4.align);
+        ps_tui_oled_line(tui, 5, line_get(tui, &screen->lines->line5), screen->lines->line5.align);
+        ps_tui_oled_line(tui, 6, line_get(tui, &screen->lines->line6), screen->lines->line6.align);
+        ps_tui_oled_line(tui, 7, line_get(tui, &screen->lines->line7), screen->lines->line7.align);
         break;
 
     default:
