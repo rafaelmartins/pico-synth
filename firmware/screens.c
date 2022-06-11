@@ -141,14 +141,15 @@ const ps_tui_screen_t screen_voice_select = {
 
 // voice
 
-static void
+static bool
 screen_voice_title_cb(ps_tui_t *tui, char *buf, size_t buflen)
 {
     if (buflen < 7)
-        return;
+        return false;
 
     memcpy(buf, "Voice  ", buflen);
     buf[6] = ((settings_ctx_t*) tui->ctx_data)->current_voice + '1';
+    return true;
 }
 
 static const ps_tui_screen_menu_t screen_voice_menu = {

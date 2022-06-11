@@ -142,6 +142,9 @@ ps_tui_oled_line(ps_tui_t *tui, uint8_t line, const char *str, ps_tui_oled_halig
 {
     hard_assert(tui);
 
+    if (str == NULL)
+        return PICO_OK;
+
     if (line >= MAX_LINES)
         return PICO_ERROR_GENERIC;
 
@@ -153,9 +156,6 @@ ps_tui_oled_line(ps_tui_t *tui, uint8_t line, const char *str, ps_tui_oled_halig
     }
 
     if (slen > SCREEN_WIDTH)
-        return PICO_ERROR_GENERIC;
-
-    if (str == NULL)
         return PICO_ERROR_GENERIC;
 
     uint8_t x = 0;

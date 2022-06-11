@@ -45,8 +45,9 @@ line_get(ps_tui_t *tui, const ps_tui_screen_line_t *l)
     case PS_TUI_SCREEN_LINE_CALLBACK:
         if (l->callback != NULL) {
             memset(buf_line, 0, sizeof(buf_line));
-            l->callback(tui, buf_line, sizeof(buf_line));
-            return buf_line;
+            if (l->callback(tui, buf_line, sizeof(buf_line)))
+                return buf_line;
+            return NULL;
         }
         break;
 

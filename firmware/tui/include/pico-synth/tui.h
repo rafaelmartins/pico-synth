@@ -77,7 +77,7 @@ typedef struct {
     const struct ps_tui_screen *_current_screen;
 } ps_tui_t;
 
-typedef void (*ps_tui_screen_line_callback_t) (ps_tui_t *tui, char *buf, size_t buflen);
+typedef bool (*ps_tui_screen_line_callback_t) (ps_tui_t *tui, char *buf, size_t buflen);
 
 typedef struct {
     char content[17];
