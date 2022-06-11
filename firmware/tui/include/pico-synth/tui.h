@@ -152,3 +152,4 @@ void ps_tui_oled_clear(ps_tui_t *tui);
 int ps_tui_oled_line(ps_tui_t *tui, uint8_t line, const char *str, ps_tui_oled_halign_t align);
 
 int ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen);
+int ps_tui_screen_reload(ps_tui_t *tui, const ps_tui_screen_t *screen);

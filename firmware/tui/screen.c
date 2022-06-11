@@ -200,6 +200,17 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
 
     tui->_current_screen = screen;
     return PICO_OK;
+}
 
-    return 0;
+
+int
+ps_tui_screen_reload(ps_tui_t *tui, const ps_tui_screen_t *screen)
+{
+    if (screen == NULL)
+        return PICO_OK;
+
+    if (tui->_current_screen == screen)
+        return ps_tui_screen_load(tui, tui->_current_screen);
+
+    return PICO_OK;
 }
