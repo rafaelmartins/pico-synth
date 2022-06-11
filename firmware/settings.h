@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#pragma once
+
 #include <pico-synth/tui.h>
 
 #define SETTINGS_VERSION 1
