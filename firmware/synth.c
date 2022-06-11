@@ -25,13 +25,15 @@ synth_init(synth_t *s)
 
     ps_midi_init(&s->midi);
     hard_assert(ps_tui_init(&s->tui) == PICO_OK);
-    s->tui.ctx_data = &s->settings;
+    s->tui.ctx_data = s;
 
     for (uint8_t i = 0; i < 2; i++) {
         if (s->channels[i].with_led) {
             gpio_init(s->channels[i].led);
             gpio_set_dir(s->channels[i].led, true);
         }
+
+        s->channels[i].note = 0xff;
     }
 }
 
@@ -142,4 +144,5 @@ channel_unset_note(synth_t *s, uint8_t midi_ch, uint8_t note)
         gpio_put(c->led, false);
 
     c->running = false;
+    c->note = 0xff;
 }

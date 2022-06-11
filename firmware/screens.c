@@ -9,6 +9,7 @@
 #include <pico-synth/tui.h>
 #include "settings.h"
 #include "screens.h"
+#include "synth.h"
 
 
 // splash
@@ -88,20 +89,20 @@ const ps_tui_screen_t screen_settings = {
 static void
 screen_voice_select_1_cb(ps_tui_t *tui)
 {
-    settings_ctx_t *ctx = tui->ctx_data;
-    hard_assert(ctx);
+    synth_t *synth = tui->ctx_data;
+    hard_assert(synth);
 
-    ctx->current_voice = 0;
+    synth->settings.current_voice = 0;
     ps_tui_screen_load(tui, &screen_voice);
 }
 
 static void
 screen_voice_select_2_cb(ps_tui_t *tui)
 {
-    settings_ctx_t *ctx = tui->ctx_data;
-    hard_assert(ctx);
+    synth_t *synth = tui->ctx_data;
+    hard_assert(synth);
 
-    ctx->current_voice = 1;
+    synth->settings.current_voice = 1;
     ps_tui_screen_load(tui, &screen_voice);
 }
 
@@ -148,7 +149,7 @@ screen_voice_title_cb(ps_tui_t *tui, char *buf, size_t buflen)
         return false;
 
     memcpy(buf, "Voice  ", buflen);
-    buf[6] = ((settings_ctx_t*) tui->ctx_data)->current_voice + '1';
+    buf[6] = ((synth_t*) tui->ctx_data)->settings.current_voice + '1';
     return true;
 }
 
