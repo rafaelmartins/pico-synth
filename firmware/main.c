@@ -82,15 +82,15 @@ ps_midi_message_cb(const ps_midi_message_t *msg)
 {
     switch (msg->group) {
     case PS_MIDI_MESSAGE_GROUP_CHANNEL:
-        switch (msg->message.channel.type) {
+        switch (msg->channel.type) {
         case PS_MIDI_MESSAGE_TYPE_CHANNEL_NOTE_ON:
-            if (msg->message.channel.data[1] != 0) {
-                channel_set_note(&synth, msg->message.channel.channel, msg->message.channel.data[0], msg->message.channel.data[1]);
+            if (msg->channel.data[1] != 0) {
+                channel_set_note(&synth, msg->channel.channel, msg->channel.data[0], msg->channel.data[1]);
                 break;
             }
 
         case PS_MIDI_MESSAGE_TYPE_CHANNEL_NOTE_OFF:
-            channel_unset_note(&synth, msg->message.channel.channel , msg->message.channel.data[0]);
+            channel_unset_note(&synth, msg->channel.channel , msg->channel.data[0]);
             break;
 
         case PS_MIDI_MESSAGE_TYPE_CHANNEL_POLYPHONIC_PRESSURE:

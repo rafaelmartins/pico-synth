@@ -78,7 +78,7 @@ typedef struct {
         ps_midi_message_system_t system;
         ps_midi_message_system_rt_t system_rt;
         ps_midi_message_sysex_t sysex;
-    } message;
+    };
 } ps_midi_message_t;
 
 typedef struct {

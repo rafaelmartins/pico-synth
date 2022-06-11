@@ -200,13 +200,13 @@ call_channel(ps_midi_message_type_channel_t type, uint8_t channel, const uint8_t
 
     ps_midi_message_t msg = {
         .group = PS_MIDI_MESSAGE_GROUP_CHANNEL,
-        .message.channel = {
+        .channel = {
             .type = type,
             .channel = channel,
             .data_len = data_len,
         },
     };
-    memcpy(msg.message.channel.data, data, data_len);
+    memcpy(msg.channel.data, data, data_len);
 
     ps_midi_message_cb(&msg);
 }
@@ -220,12 +220,12 @@ call_system(ps_midi_message_type_system_t type, const uint8_t *data, uint8_t dat
 
     ps_midi_message_t msg = {
         .group = PS_MIDI_MESSAGE_GROUP_SYSTEM,
-        .message.system = {
+        .system = {
             .type = type,
             .data_len = data_len,
         },
     };
-    memcpy(msg.message.system.data, data, data_len);
+    memcpy(msg.system.data, data, data_len);
 
     ps_midi_message_cb(&msg);
 }
@@ -239,7 +239,7 @@ call_system_rt(ps_midi_message_type_system_rt_t type)
 
     const ps_midi_message_t msg = {
         .group = PS_MIDI_MESSAGE_GROUP_SYSTEM_RT,
-        .message.system_rt = {
+        .system_rt = {
             .type = type,
         },
     };
@@ -256,7 +256,7 @@ call_sysex(ps_midi_message_type_sysex_t type, uint8_t data)
 
     const ps_midi_message_t msg = {
         .group = PS_MIDI_MESSAGE_GROUP_SYSEX,
-        .message.sysex = {
+        .sysex = {
             .type = type,
             .data = data,
         },
