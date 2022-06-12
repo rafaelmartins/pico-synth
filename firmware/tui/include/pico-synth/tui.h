@@ -144,8 +144,9 @@ typedef struct ps_tui_screen {
 int ps_tui_init(ps_tui_t *tui);
 int ps_tui_task(ps_tui_t *tui);
 
-int ps_tui_eeprom_read(ps_tui_t *tui, uint16_t addr, uint8_t *data, size_t data_len);
-int ps_tui_eeprom_write(ps_tui_t *tui, uint16_t addr, uint8_t *data, size_t data_len);
+int ps_tui_eeprom_read(ps_tui_t *tui, uint16_t addr, void *data, size_t data_len);
+int ps_tui_eeprom_write(ps_tui_t *tui, uint16_t addr, void *data, size_t data_len);
+int ps_tui_eeprom_erase(ps_tui_t *tui);
 
 int ps_tui_oled_clear_line(ps_tui_t *tui, uint8_t line);
 void ps_tui_oled_clear(ps_tui_t *tui);
