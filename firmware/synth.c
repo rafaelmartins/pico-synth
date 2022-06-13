@@ -25,7 +25,6 @@ synth_init(synth_t *s)
 
     ps_midi_init(&s->midi);
     hard_assert(ps_tui_init(&s->tui) == PICO_OK);
-    s->tui.ctx_data = s;
 
     for (uint8_t i = 0; i < 2; i++) {
         if (s->channels[i].with_led) {

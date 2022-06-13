@@ -193,7 +193,7 @@ parse_status(uint8_t status, ps_midi_message_group_t *group, uint8_t *type)
 
 
 static void
-call_channel(ps_midi_message_type_channel_t type, uint8_t channel, const uint8_t *data, uint8_t data_len)
+call_channel(ps_midi_message_type_channel_t type, uint8_t channel, const uint8_t *data, uint8_t data_len, void *ctx_data)
 {
     if (ps_midi_message_cb == NULL)
         return;
@@ -208,12 +208,12 @@ call_channel(ps_midi_message_type_channel_t type, uint8_t channel, const uint8_t
     };
     memcpy(msg.channel.data, data, data_len);
 
-    ps_midi_message_cb(&msg);
+    ps_midi_message_cb(&msg, ctx_data);
 }
 
 
 static void
-call_system(ps_midi_message_type_system_t type, const uint8_t *data, uint8_t data_len)
+call_system(ps_midi_message_type_system_t type, const uint8_t *data, uint8_t data_len, void *ctx_data)
 {
     if (ps_midi_message_cb == NULL)
         return;
@@ -227,12 +227,12 @@ call_system(ps_midi_message_type_system_t type, const uint8_t *data, uint8_t dat
     };
     memcpy(msg.system.data, data, data_len);
 
-    ps_midi_message_cb(&msg);
+    ps_midi_message_cb(&msg, ctx_data);
 }
 
 
 static void
-call_system_rt(ps_midi_message_type_system_rt_t type)
+call_system_rt(ps_midi_message_type_system_rt_t type, void *ctx_data)
 {
     if (ps_midi_message_cb == NULL)
         return;
@@ -244,12 +244,12 @@ call_system_rt(ps_midi_message_type_system_rt_t type)
         },
     };
 
-    ps_midi_message_cb(&msg);
+    ps_midi_message_cb(&msg, ctx_data);
 }
 
 
 static void
-call_sysex(ps_midi_message_type_sysex_t type, uint8_t data)
+call_sysex(ps_midi_message_type_sysex_t type, uint8_t data, void *ctx_data)
 {
     if (ps_midi_message_cb == NULL)
         return;
@@ -262,7 +262,7 @@ call_sysex(ps_midi_message_type_sysex_t type, uint8_t data)
         },
     };
 
-    ps_midi_message_cb(&msg);
+    ps_midi_message_cb(&msg, ctx_data);
 }
 
 
@@ -271,7 +271,7 @@ push_byte(ps_midi_t *m, uint8_t b)
 {
     if (is_data(b)) {
         if (m->_sysex) {
-            call_sysex(PS_MIDI_MESSAGE_TYPE_SYSEX_DATA, b);
+            call_sysex(PS_MIDI_MESSAGE_TYPE_SYSEX_DATA, b, m->ctx_data);
             return;
         }
 
@@ -284,9 +284,9 @@ push_byte(ps_midi_t *m, uint8_t b)
         m->_data[m->_data_idx++] = b;
         if (m->_data_idx == m->_data_len) {
             if (m->_channel_type != 0)
-                call_channel(m->_channel_type, m->_channel, m->_data, m->_data_len);
+                call_channel(m->_channel_type, m->_channel, m->_data, m->_data_len, m->ctx_data);
             else
-                call_system(m->_system_type, m->_data, m->_data_len);
+                call_system(m->_system_type, m->_data, m->_data_len, m->ctx_data);
         }
         return;
     }
@@ -316,18 +316,18 @@ push_byte(ps_midi_t *m, uint8_t b)
         break;
 
     case PS_MIDI_MESSAGE_GROUP_SYSTEM_RT:
-        call_system_rt(type);
+        call_system_rt(type, m->ctx_data);
         break;
 
     case PS_MIDI_MESSAGE_GROUP_SYSEX:
         switch ((ps_midi_message_type_sysex_t) type) {
         case PS_MIDI_MESSAGE_TYPE_SYSEX_BEGIN:
             m->_sysex = true;
-            call_sysex(type, 0);
+            call_sysex(type, 0, m->ctx_data);
             break;
         case PS_MIDI_MESSAGE_TYPE_SYSEX_END:
             m->_sysex = false;
-            call_sysex(type, 0);
+            call_sysex(type, 0, m->ctx_data);
             break;
         case PS_MIDI_MESSAGE_TYPE_SYSEX_DATA:
             break;

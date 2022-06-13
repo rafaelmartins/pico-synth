@@ -12,6 +12,8 @@ pico_sdk_init()
 add_executable(pico-synth
     main.c
 
+    midi-impl.c
+
     screens.c
     screens.h
 

@@ -36,6 +36,8 @@ static synth_t synth = {
             .version = 0x0100,
             .product = "pico-synth",
         },
+
+        .ctx_data = &synth,
     },
 
     .tui = {
@@ -60,6 +62,8 @@ static synth_t synth = {
         .oled = {
             .controller = PS_TUI_OLED_SH1106,
         },
+
+        .ctx_data = &synth,
     },
 
     .channels = {
@@ -75,39 +79,6 @@ static synth_t synth = {
         },
     },
 };
-
-
-void
-ps_midi_message_cb(const ps_midi_message_t *msg)
-{
-    switch (msg->group) {
-    case PS_MIDI_MESSAGE_GROUP_CHANNEL:
-        switch (msg->channel.type) {
-        case PS_MIDI_MESSAGE_TYPE_CHANNEL_NOTE_ON:
-            if (msg->channel.data[1] != 0) {
-                channel_set_note(&synth, msg->channel.channel, msg->channel.data[0], msg->channel.data[1]);
-                break;
-            }
-
-        case PS_MIDI_MESSAGE_TYPE_CHANNEL_NOTE_OFF:
-            channel_unset_note(&synth, msg->channel.channel , msg->channel.data[0]);
-            break;
-
-        case PS_MIDI_MESSAGE_TYPE_CHANNEL_POLYPHONIC_PRESSURE:
-        case PS_MIDI_MESSAGE_TYPE_CHANNEL_CONTROL_CHANGE:
-        case PS_MIDI_MESSAGE_TYPE_CHANNEL_PROGRAM_CHANGE:
-        case PS_MIDI_MESSAGE_TYPE_CHANNEL_CHANNEL_PRESSURE:
-        case PS_MIDI_MESSAGE_TYPE_CHANNEL_PITCH_BEND:
-            break;
-        }
-        break;
-
-    case PS_MIDI_MESSAGE_GROUP_SYSTEM:
-    case PS_MIDI_MESSAGE_GROUP_SYSTEM_RT:
-    case PS_MIDI_MESSAGE_GROUP_SYSEX:
-        break;
-    }
-}
 
 
 static void

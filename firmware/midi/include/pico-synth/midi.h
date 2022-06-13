@@ -96,6 +96,8 @@ typedef struct {
         uint16_t version;
     } usb;
 
+    void *ctx_data;
+
     // private
     mutex_t _mtx;
     bool _sysex;
@@ -109,4 +111,4 @@ typedef struct {
 
 void ps_midi_init(ps_midi_t *m);
 void ps_midi_task(ps_midi_t *m);
-void ps_midi_message_cb(const ps_midi_message_t *msg) __attribute__((weak));
+void ps_midi_message_cb(const ps_midi_message_t *msg, void *ctx_data) __attribute__((weak));
