@@ -19,7 +19,7 @@ midi_uart_init(ps_midi_t *m)
     uart_init(m->uart.uart, 31250);
     gpio_set_function(m->uart.uart_rx, GPIO_FUNC_UART);
     gpio_pull_up(m->uart.uart_rx);
-    uart_set_fifo_enabled(m->uart.uart, false);
+    uart_set_fifo_enabled(m->uart.uart, true);
     uart_set_format(m->uart.uart, 8, 1, UART_PARITY_NONE);
 }
 
