@@ -5,14 +5,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <stdio.h>
 #include <string.h>
 #include "driver-ec11.h"
 #include "driver-oled.h"
 
 // FIXME: make this thread safe? is it needed?
-static char buf_selected[17]   = "> ";
-static char buf_unselected[17] = "  ";
-static char buf_line[17];
+static char buf_selected[MAX_CHARS_PER_LINE + 1]   = "> ";
+static char buf_unselected[MAX_CHARS_PER_LINE + 1] = "  ";
+static char buf_line[MAX_CHARS_PER_LINE + 1];
 
 
 static void
@@ -59,7 +60,7 @@ line_get(ps_tui_t *tui, const ps_tui_screen_line_t *l)
 }
 
 
-static void
+static inline void
 menu_callback(ps_tui_t *tui, const ps_tui_screen_menu_t *m, ps_tui_encoder_action_t act)
 {
     hard_assert(tui);
@@ -120,6 +121,35 @@ menu_callback(ps_tui_t *tui, const ps_tui_screen_menu_t *m, ps_tui_encoder_actio
 }
 
 
+static inline void
+select_byte_callback(ps_tui_t *tui, const ps_tui_screen_select_byte_t *sb, ps_tui_encoder_action_t act)
+{
+    hard_assert(tui);
+    if (sb == NULL || sb->getter_func == NULL || sb->setter_func == NULL)
+        return;
+
+    uint8_t v = sb->getter_func(tui);
+
+    switch (act) {
+    case PS_TUI_ENCODER_ACTION_BUTTON:
+        return run_action(tui, &sb->action);
+
+    case PS_TUI_ENCODER_ACTION_ROTATE_CCW:
+        if (v > sb->min)
+            v--;
+        break;
+
+    case PS_TUI_ENCODER_ACTION_ROTATE_CW:
+        if (v < sb->max)
+            v++;
+        break;
+    }
+
+    sb->setter_func(tui, v);
+    ps_tui_screen_load(tui, tui->_current_screen);
+}
+
+
 void
 ec11_callback(ps_tui_t *tui, ps_tui_encoder_action_t act)
 {
@@ -141,6 +171,10 @@ ec11_callback(ps_tui_t *tui, ps_tui_encoder_action_t act)
         if (tui->_current_screen->lines != NULL && act == PS_TUI_ENCODER_ACTION_BUTTON)
             run_action(tui, &tui->_current_screen->lines->action);
         break;
+
+    case PS_TUI_SCREEN_SELECT_BYTE:
+        select_byte_callback(tui, tui->_current_screen->select_byte, act);
+        break;
     }
 }
 
@@ -151,6 +185,8 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
     hard_assert(tui);
     if (screen == NULL)
         return PICO_OK;  // FIXME: clear and render ?
+
+    uint8_t v = 0;
 
     switch (screen->type) {
     case PS_TUI_SCREEN_FUNC:
@@ -190,8 +226,29 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
         ps_tui_oled_line(tui, 7, line_get(tui, &screen->lines->line7), screen->lines->line7.align);
         break;
 
-    default:
-        return PICO_OK;
+    case PS_TUI_SCREEN_SELECT_BYTE:
+        if (screen->select_byte == NULL || screen->select_byte->getter_func == NULL)
+            return PICO_OK;
+
+        ps_tui_oled_clear(tui);
+        ps_tui_oled_line(tui, 0, line_get(tui, &screen->select_byte->title), PS_TUI_OLED_HALIGN_CENTER);
+
+        v = screen->select_byte->getter_func(tui);
+        if (v > screen->select_byte->max)
+            v = screen->select_byte->max;
+        if (v < screen->select_byte->min)
+            v = screen->select_byte->min;
+
+        if (screen->select_byte->to_string_func != NULL) {
+            char tmp[sizeof(buf_line) - 6];
+            screen->select_byte->to_string_func(tui, v, tmp, sizeof(tmp));
+            snprintf(buf_line, sizeof(buf_line), "<< %s >>", tmp);
+        }
+        else {
+            snprintf(buf_line, sizeof(buf_line), "<< %d >>", v);
+        }
+        ps_tui_oled_line(tui, 4, buf_line, PS_TUI_OLED_HALIGN_CENTER);
+        break;
     }
 
     int rv = oled_render(tui);

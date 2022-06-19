@@ -128,16 +128,32 @@ typedef struct {
     ps_tui_screen_action_t action;
 } ps_tui_screen_lines_t;
 
+typedef void (*ps_tui_screen_select_byte_to_string_func_t) (ps_tui_t *tui, uint8_t b, char *buf, size_t buflen);
+typedef uint8_t (*ps_tui_screen_select_byte_getter_func_t) (ps_tui_t *tui);
+typedef void (*ps_tui_screen_select_byte_setter_func_t) (ps_tui_t *tui, uint8_t b);
+
+typedef struct {
+    ps_tui_screen_line_t title;
+    ps_tui_screen_select_byte_to_string_func_t to_string_func;
+    ps_tui_screen_select_byte_getter_func_t getter_func;
+    ps_tui_screen_select_byte_setter_func_t setter_func;
+    ps_tui_screen_action_t action;
+    uint8_t min;
+    uint8_t max;
+} ps_tui_screen_select_byte_t;
+
 typedef struct ps_tui_screen {
     enum {
         PS_TUI_SCREEN_FUNC = 1,
         PS_TUI_SCREEN_MENU,
         PS_TUI_SCREEN_LINES,
+        PS_TUI_SCREEN_SELECT_BYTE,
     } type;
     union {
         const ps_tui_screen_func_t *func;
         const ps_tui_screen_menu_t *menu;
         const ps_tui_screen_lines_t *lines;
+        const ps_tui_screen_select_byte_t *select_byte;
     };
 } ps_tui_screen_t;
 
