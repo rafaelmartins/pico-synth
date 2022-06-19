@@ -77,35 +77,35 @@ typedef struct {
     const struct ps_tui_screen *_current_screen;
 } ps_tui_t;
 
-typedef bool (*ps_tui_screen_line_callback_t) (ps_tui_t *tui, char *buf, size_t buflen);
+typedef bool (*ps_tui_screen_line_func_t) (ps_tui_t *tui, char *buf, size_t buflen);
 
 typedef struct {
     char content[17];
     ps_tui_oled_halign_t align;
-    ps_tui_screen_line_callback_t callback;
+    ps_tui_screen_line_func_t func;
     enum {
         PS_TUI_SCREEN_LINE_CONTENT,
-        PS_TUI_SCREEN_LINE_CALLBACK,
+        PS_TUI_SCREEN_LINE_FUNC,
     } type;
 } ps_tui_screen_line_t;
 
-typedef void (*ps_tui_screen_action_callback_t) (ps_tui_t *tui);
+typedef void (*ps_tui_screen_action_func_t) (ps_tui_t *tui);
 
 typedef struct {
     enum {
-        PS_TUI_SCREEN_ACTION_CALLBACK = 1,
+        PS_TUI_SCREEN_ACTION_FUNC = 1,
         PS_TUI_SCREEN_ACTION_NEXT,
     } type;
     union {
-        ps_tui_screen_action_callback_t callback;
+        ps_tui_screen_action_func_t func;
         const struct ps_tui_screen *next;
     };
 } ps_tui_screen_action_t;
 
 typedef struct {
-    void (*render_callback) (ps_tui_t *tui);
-    void (*encoder_callback) (ps_tui_t *tui, ps_tui_encoder_action_t act);
-} ps_tui_screen_callback_t;
+    void (*render_func) (ps_tui_t *tui);
+    void (*encoder_func) (ps_tui_t *tui, ps_tui_encoder_action_t act);
+} ps_tui_screen_func_t;
 
 typedef struct {
     ps_tui_screen_line_t title;
@@ -130,12 +130,12 @@ typedef struct {
 
 typedef struct ps_tui_screen {
     enum {
-        PS_TUI_SCREEN_CALLBACK = 1,
+        PS_TUI_SCREEN_FUNC = 1,
         PS_TUI_SCREEN_MENU,
         PS_TUI_SCREEN_LINES,
     } type;
     union {
-        const ps_tui_screen_callback_t *callback;
+        const ps_tui_screen_func_t *func;
         const ps_tui_screen_menu_t *menu;
         const ps_tui_screen_lines_t *lines;
     };

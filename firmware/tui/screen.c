@@ -23,9 +23,9 @@ run_action(ps_tui_t *tui, const ps_tui_screen_action_t *act)
         return;
 
     switch (act->type) {
-    case PS_TUI_SCREEN_ACTION_CALLBACK:
-        if (act->callback != NULL)
-            act->callback(tui);
+    case PS_TUI_SCREEN_ACTION_FUNC:
+        if (act->func != NULL)
+            act->func(tui);
         break;
 
     case PS_TUI_SCREEN_ACTION_NEXT:
@@ -42,10 +42,10 @@ line_get(ps_tui_t *tui, const ps_tui_screen_line_t *l)
         return NULL;
 
     switch (l->type) {
-    case PS_TUI_SCREEN_LINE_CALLBACK:
-        if (l->callback != NULL) {
+    case PS_TUI_SCREEN_LINE_FUNC:
+        if (l->func != NULL) {
             memset(buf_line, 0, sizeof(buf_line));
-            if (l->callback(tui, buf_line, sizeof(buf_line)))
+            if (l->func(tui, buf_line, sizeof(buf_line)))
                 return buf_line;
             return NULL;
         }
@@ -128,9 +128,9 @@ ec11_callback(ps_tui_t *tui, ps_tui_encoder_action_t act)
         return;
 
     switch (tui->_current_screen->type) {
-    case PS_TUI_SCREEN_CALLBACK:
-        if (tui->_current_screen->callback != NULL && tui->_current_screen->callback->encoder_callback != NULL)
-            tui->_current_screen->callback->encoder_callback(tui, act);
+    case PS_TUI_SCREEN_FUNC:
+        if (tui->_current_screen->func != NULL && tui->_current_screen->func->encoder_func != NULL)
+            tui->_current_screen->func->encoder_func(tui, act);
         break;
 
     case PS_TUI_SCREEN_MENU:
@@ -153,11 +153,11 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
         return PICO_OK;  // FIXME: clear and render ?
 
     switch (screen->type) {
-    case PS_TUI_SCREEN_CALLBACK:
-        if (screen->callback == NULL || screen->callback->render_callback == NULL)
+    case PS_TUI_SCREEN_FUNC:
+        if (screen->func == NULL || screen->func->render_func == NULL)
             return PICO_OK;
 
-        screen->callback->render_callback(tui);
+        screen->func->render_func(tui);
         break;
 
     case PS_TUI_SCREEN_MENU:

@@ -29,14 +29,14 @@ const ps_tui_screen_t screen_splash = {
 // main
 
 static void
-screen_main_render_callback(ps_tui_t *tui)
+screen_main_render(ps_tui_t *tui)
 {
     ps_tui_oled_clear(tui);
     ps_tui_oled_line(tui, 0, "pico-synth", PS_TUI_OLED_HALIGN_CENTER);
 }
 
 static void
-screen_main_encoder_callback(ps_tui_t *tui, ps_tui_encoder_action_t act)
+screen_main_encoder(ps_tui_t *tui, ps_tui_encoder_action_t act)
 {
     if (act != PS_TUI_ENCODER_ACTION_BUTTON)
         return;
@@ -44,14 +44,14 @@ screen_main_encoder_callback(ps_tui_t *tui, ps_tui_encoder_action_t act)
     ps_tui_screen_load(tui, &screen_settings);
 }
 
-static const ps_tui_screen_callback_t screen_main_callback = {
-    .render_callback = screen_main_render_callback,
-    .encoder_callback = screen_main_encoder_callback,
+static const ps_tui_screen_func_t screen_main_func = {
+    .render_func = screen_main_render,
+    .encoder_func = screen_main_encoder,
 };
 
 const ps_tui_screen_t screen_main = {
-    .type = PS_TUI_SCREEN_CALLBACK,
-    .callback = &screen_main_callback,
+    .type = PS_TUI_SCREEN_FUNC,
+    .func = &screen_main_func,
 };
 
 
@@ -87,7 +87,7 @@ const ps_tui_screen_t screen_settings = {
 // voice select
 
 static void
-screen_voice_select_1_cb(ps_tui_t *tui)
+screen_voice_select_1(ps_tui_t *tui)
 {
     synth_t *synth = tui->ctx_data;
     hard_assert(synth);
@@ -97,7 +97,7 @@ screen_voice_select_1_cb(ps_tui_t *tui)
 }
 
 static void
-screen_voice_select_2_cb(ps_tui_t *tui)
+screen_voice_select_2(ps_tui_t *tui)
 {
     synth_t *synth = tui->ctx_data;
     hard_assert(synth);
@@ -112,15 +112,15 @@ static const ps_tui_screen_menu_t screen_voice_select_menu = {
         {
             .content = "Voice 1",
             .action = {
-                .type = PS_TUI_SCREEN_ACTION_CALLBACK,
-                .callback = screen_voice_select_1_cb,
+                .type = PS_TUI_SCREEN_ACTION_FUNC,
+                .func = screen_voice_select_1,
             },
         },
         {
             .content = "Voice 2",
             .action = {
-                .type = PS_TUI_SCREEN_ACTION_CALLBACK,
-                .callback = screen_voice_select_2_cb,
+                .type = PS_TUI_SCREEN_ACTION_FUNC,
+                .func = screen_voice_select_2,
             },
         },
         {
@@ -143,7 +143,7 @@ const ps_tui_screen_t screen_voice_select = {
 // voice
 
 static bool
-screen_voice_title_cb(ps_tui_t *tui, char *buf, size_t buflen)
+screen_voice_title(ps_tui_t *tui, char *buf, size_t buflen)
 {
     if (buflen < 7)
         return false;
@@ -155,8 +155,8 @@ screen_voice_title_cb(ps_tui_t *tui, char *buf, size_t buflen)
 
 static const ps_tui_screen_menu_t screen_voice_menu = {
     .title = {
-        .type = PS_TUI_SCREEN_LINE_CALLBACK,
-        .callback = screen_voice_title_cb,
+        .type = PS_TUI_SCREEN_LINE_FUNC,
+        .func = screen_voice_title,
     },
     .items = {
         {
