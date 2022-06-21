@@ -206,6 +206,8 @@ synth_preset_set_waveform(synth_t *synth, uint8_t preset, ps_engine_module_oscil
         return;
 
     synth->settings.presets[preset].oscillator.waveform = wf;
+    ps_tui_eeprom_write_lazy(&synth->tui, &synth->settings.presets[preset].oscillator.waveform,
+                             sizeof(synth->settings.presets[preset].oscillator.waveform));
 
     for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
         if (synth->settings.voices[i].preset == preset)
@@ -220,6 +222,8 @@ synth_preset_set_adsr_attack(synth_t *synth, uint8_t preset, uint8_t attack)
         return;
 
     synth->settings.presets[preset].adsr.attack = attack;
+    ps_tui_eeprom_write_lazy(&synth->tui, &synth->settings.presets[preset].adsr.attack,
+                             sizeof(synth->settings.presets[preset].adsr.attack));
 
     for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
         if (synth->settings.voices[i].preset == preset)
@@ -234,6 +238,8 @@ synth_preset_set_adsr_decay(synth_t *synth, uint8_t preset, uint8_t decay)
         return;
 
     synth->settings.presets[preset].adsr.decay = decay;
+    ps_tui_eeprom_write_lazy(&synth->tui, &synth->settings.presets[preset].adsr.decay,
+                             sizeof(synth->settings.presets[preset].adsr.decay));
 
     for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
         if (synth->settings.voices[i].preset == preset)
@@ -248,6 +254,8 @@ synth_preset_set_adsr_sustain(synth_t *synth, uint8_t preset, uint8_t sustain)
         return;
 
     synth->settings.presets[preset].adsr.sustain = sustain;
+    ps_tui_eeprom_write_lazy(&synth->tui, &synth->settings.presets[preset].adsr.sustain,
+                             sizeof(synth->settings.presets[preset].adsr.sustain));
 
     for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
         if (synth->settings.voices[i].preset == preset)
@@ -262,6 +270,8 @@ synth_preset_set_adsr_release(synth_t *synth, uint8_t preset, uint8_t release)
         return;
 
     synth->settings.presets[preset].adsr.release = release;
+    ps_tui_eeprom_write_lazy(&synth->tui, &synth->settings.presets[preset].adsr.release,
+                             sizeof(synth->settings.presets[preset].adsr.release));
 
     for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
         if (synth->settings.voices[i].preset == preset)

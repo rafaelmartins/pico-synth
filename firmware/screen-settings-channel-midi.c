@@ -33,6 +33,8 @@ setter(ps_tui_t *tui, uint8_t b)
 {
     synth_t *synth = tui->ctx_data;
     synth->settings.voices[synth->_current_voice].midi_channel = b;
+    ps_tui_eeprom_write_lazy(tui, &synth->settings.voices[synth->_current_voice].midi_channel,
+                             sizeof(synth->settings.voices[synth->_current_voice].midi_channel));
 }
 
 
