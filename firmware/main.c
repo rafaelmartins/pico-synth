@@ -49,6 +49,8 @@ static synth_t synth = {
 
         .eeprom = {
             .ic = PS_TUI_EEPROM_24LC512,
+            .base_address = &synth.settings,
+            .max_offset = sizeof(synth.settings),
         },
 
         .encoder = {

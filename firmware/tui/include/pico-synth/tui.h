@@ -9,6 +9,8 @@
 
 #include <hardware/i2c.h>
 
+#define PS_TUI_EEPROM_BACKLOG_SIZE 1024
+
 typedef enum {
     PS_TUI_ENCODER_ACTION_BUTTON = 1,
     PS_TUI_ENCODER_ACTION_ROTATE_CW,
@@ -34,9 +36,16 @@ typedef struct {
             PS_TUI_EEPROM_24LC256 = 1,
             PS_TUI_EEPROM_24LC512,
         } ic;
+        void *base_address;
+        size_t max_offset;
 
         // private
         size_t _page_size;
+        struct {
+            size_t addr;
+            size_t len;
+        } _backlog[PS_TUI_EEPROM_BACKLOG_SIZE];
+        size_t _backlog_idx;
     } eeprom;
 
     struct {
@@ -160,8 +169,10 @@ typedef struct ps_tui_screen {
 int ps_tui_init(ps_tui_t *tui);
 int ps_tui_task(ps_tui_t *tui);
 
-int ps_tui_eeprom_read(ps_tui_t *tui, uint16_t addr, void *data, size_t data_len);
-int ps_tui_eeprom_write(ps_tui_t *tui, uint16_t addr, void *data, size_t data_len);
+int ps_tui_eeprom_read(ps_tui_t *tui, void *data, size_t data_len);
+int ps_tui_eeprom_write(ps_tui_t *tui, void *data, size_t data_len);
+void ps_tui_eeprom_write_lazy(ps_tui_t *tui, void *data, size_t data_len);
+int ps_tui_eeprom_sync(ps_tui_t *tui);
 int ps_tui_eeprom_erase(ps_tui_t *tui);
 
 int ps_tui_oled_clear_line(ps_tui_t *tui, uint8_t line);

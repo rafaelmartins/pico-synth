@@ -14,6 +14,9 @@ eeprom_init(ps_tui_t *tui)
 {
     hard_assert(tui);
     hard_assert(tui->i2c.i2c);
+    hard_assert(tui->eeprom.base_address);
+
+    tui->eeprom._backlog_idx = 0;
 
     // broadcasts not supported, we assume that address 0 means "use default"
     if (tui->eeprom.i2c_address == 0)
@@ -36,10 +39,14 @@ eeprom_init(ps_tui_t *tui)
 
 
 int
-ps_tui_eeprom_read(ps_tui_t *tui, uint16_t addr, void *data, size_t data_len)
+ps_tui_eeprom_read(ps_tui_t *tui, void *data, size_t data_len)
 {
     hard_assert(tui);
     hard_assert(tui->i2c.i2c);
+    hard_assert(tui->eeprom.base_address);
+
+    size_t addr = data - tui->eeprom.base_address;
+    hard_assert(addr < tui->eeprom.max_offset);
 
     uint8_t a[] = {
         addr >> 8,
@@ -71,8 +78,8 @@ ack_polling(ps_tui_t *tui)
 }
 
 
-int
-ps_tui_eeprom_write(ps_tui_t *tui, uint16_t addr, void *data, size_t data_len)
+static int
+eeprom_write(ps_tui_t *tui, size_t addr, void *data, size_t data_len)
 {
     hard_assert(tui);
     hard_assert(tui->i2c.i2c);
@@ -111,6 +118,63 @@ ps_tui_eeprom_write(ps_tui_t *tui, uint16_t addr, void *data, size_t data_len)
 
 
 int
+ps_tui_eeprom_write(ps_tui_t *tui, void *data, size_t data_len)
+{
+    hard_assert(tui);
+    hard_assert(tui->eeprom.base_address);
+
+    size_t addr = data - tui->eeprom.base_address;
+    hard_assert(addr < tui->eeprom.max_offset);
+
+    return eeprom_write(tui, addr, data, data_len);
+}
+
+
+void
+ps_tui_eeprom_write_lazy(ps_tui_t *tui, void *data, size_t data_len)
+{
+    hard_assert(tui);
+    hard_assert(tui->eeprom.base_address);
+
+    size_t addr = data - tui->eeprom.base_address;
+    hard_assert(addr < tui->eeprom.max_offset);
+
+    if (tui->eeprom._backlog_idx >= PS_TUI_EEPROM_BACKLOG_SIZE)
+        return;
+
+    // avoid duplicates
+    for (size_t i = 0; i < tui->eeprom._backlog_idx; i++)
+        if (tui->eeprom._backlog[i].addr == addr && tui->eeprom._backlog[i].len == data_len)
+            return;
+
+    tui->eeprom._backlog[tui->eeprom._backlog_idx].addr = addr;
+    tui->eeprom._backlog[tui->eeprom._backlog_idx++].len = data_len;
+}
+
+
+int
+ps_tui_eeprom_sync(ps_tui_t *tui)
+{
+    hard_assert(tui);
+    hard_assert(tui->eeprom.base_address);
+
+    // if backlog overflowed, just push everything
+    if (tui->eeprom._backlog_idx > PS_TUI_EEPROM_BACKLOG_SIZE)
+        return eeprom_write(tui, 0, tui->eeprom.base_address, tui->eeprom.max_offset);
+
+    int rv = PICO_OK;
+    for (size_t i = 0; i < tui->eeprom._backlog_idx; i++) {
+        void *data = tui->eeprom.base_address + tui->eeprom._backlog[i].addr;
+        rv = eeprom_write(tui, tui->eeprom._backlog[i].addr, data, tui->eeprom._backlog[i].len);
+        if (rv != PICO_OK)
+            return rv;
+    }
+    tui->eeprom._backlog_idx = 0;
+    return rv;
+}
+
+
+int
 ps_tui_eeprom_erase(ps_tui_t *tui)
 {
     hard_assert(tui);
@@ -121,7 +185,7 @@ ps_tui_eeprom_erase(ps_tui_t *tui)
 
     // FIXME: ensure that every eeprom model comes with 512 pages.
     for (uint16_t i = 0; i < 512; i++) {
-        int rv = ps_tui_eeprom_write(tui, i * tui->eeprom._page_size, buf, sizeof(buf));
+        int rv = eeprom_write(tui, i * tui->eeprom._page_size, buf, sizeof(buf));
         if (rv < 0)
             return rv;
     }

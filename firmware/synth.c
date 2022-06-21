@@ -20,8 +20,7 @@ settings_init(ps_tui_t *t, eeprom_settings_t *s)
     hard_assert(t);
     hard_assert(s);
 
-    int rv = ps_tui_eeprom_read(t, offsetof(eeprom_settings_t, version),
-                                &s->version, sizeof(s->version));
+    int rv = ps_tui_eeprom_read(t, &s->version, sizeof(s->version));
     if (rv != PICO_OK)
         return rv;
 
@@ -35,10 +34,10 @@ settings_init(ps_tui_t *t, eeprom_settings_t *s)
         for (uint8_t i = 0; i < EEPROM_PRESET_COUNT; i++)
             s->presets[i].adsr.sustain = 0xff;
 
-        return ps_tui_eeprom_write(t, 0, s, sizeof(eeprom_settings_t));
+        return ps_tui_eeprom_write(t, s, sizeof(eeprom_settings_t));
     }
 
-    return ps_tui_eeprom_read(t, 0, s, sizeof(eeprom_settings_t));
+    return ps_tui_eeprom_read(t, s, sizeof(eeprom_settings_t));
 }
 
 
