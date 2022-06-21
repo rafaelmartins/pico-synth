@@ -80,7 +80,7 @@ typedef struct {
 typedef bool (*ps_tui_screen_line_func_t) (ps_tui_t *tui, char *buf, size_t buflen);
 
 typedef struct {
-    char content[17];
+    char content[22];
     ps_tui_oled_halign_t align;
     ps_tui_screen_line_func_t func;
     enum {
@@ -111,7 +111,7 @@ typedef struct {
     ps_tui_screen_line_t title;
     uint8_t num_items;
     struct {
-        char content[15];
+        char content[20];
         ps_tui_screen_action_t action;
     } items[];
 } ps_tui_screen_menu_t;

@@ -7,9 +7,66 @@
 
 #include <pico/stdlib.h>
 #include <pico/time.h>
-#include "screens.h"
+#include "eeprom-types.h"
+#include "screen-main.h"
+#include "screen-splash.h"
 #include "synth.h"
 #include "synth-data.h"
+
+
+static inline int
+settings_init(ps_tui_t *t, eeprom_settings_t *s)
+{
+    hard_assert(t);
+    hard_assert(s);
+
+    int rv = ps_tui_eeprom_read(t, offsetof(eeprom_settings_t, version),
+                                &s->version, sizeof(s->version));
+    if (rv != PICO_OK)
+        return rv;
+
+    // if version value is not initialized we assume the whole eeprom is not initialized
+    if (s->version == 0xffff) {
+        s->version = EEPROM_SETTINGS_VERSION;
+
+        for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
+            s->voices[i].midi_channel = i;
+
+        for (uint8_t i = 0; i < EEPROM_PRESET_COUNT; i++)
+            s->presets[i].adsr.sustain = 0xff;
+
+        return ps_tui_eeprom_write(t, 0, s, sizeof(eeprom_settings_t));
+    }
+
+    return ps_tui_eeprom_read(t, 0, s, sizeof(eeprom_settings_t));
+}
+
+
+static inline ps_engine_voice_t*
+channel_init(synth_channel_t *c)
+{
+    hard_assert(c);
+
+    if (c->with_led) {
+        gpio_init(c->led);
+        gpio_set_dir(c->led, true);
+    }
+
+    c->note = 0xff;
+
+    c->oscillator_src.mod = &ps_engine_module_oscillator;
+    c->oscillator_src.data = &c->oscillator;
+    c->amplifier_fltr.mod = &ps_engine_module_amplifier;
+    c->amplifier_fltr.data = &c->amplifier;
+    c->adsr_fltr.mod = &ps_engine_module_adsr;
+    c->adsr_fltr.data = &c->adsr;
+
+    c->voice.source = &c->oscillator_src;
+    c->voice.filters = &c->amplifier_fltr;
+    c->amplifier_fltr.next = &c->adsr_fltr;
+
+    return &c->voice;
+}
 
 
 void
@@ -26,14 +83,12 @@ synth_init(synth_t *s)
     ps_midi_init(&s->midi);
     hard_assert(ps_tui_init(&s->tui) == PICO_OK);
 
-    for (uint8_t i = 0; i < 2; i++) {
-        if (s->channels[i].with_led) {
-            gpio_init(s->channels[i].led);
-            gpio_set_dir(s->channels[i].led, true);
-        }
+    for (uint8_t i = 0; i < 2; i++)
+        s->engine.channels[i].voices = channel_init(&s->channels[i]);
 
-        s->channels[i].note = 0xff;
-    }
+    ps_tui_screen_load(&s->tui, &screen_splash);
+    hard_assert(PICO_OK == settings_init(&s->tui, &s->settings));
+    ps_tui_screen_load(&s->tui, &screen_main);
 }
 
 
@@ -42,10 +97,6 @@ synth_core0(synth_t *s)
 {
     hard_assert(s);
 
-    ps_tui_screen_load(&s->tui, &screen_splash);
-    sleep_ms(2000);
-    ps_tui_screen_load(&s->tui, &screen_main);
-
     while (1) {
         ps_midi_task(&s->midi);
         hard_assert(ps_tui_task(&s->tui) == PICO_OK);
@@ -53,40 +104,28 @@ synth_core0(synth_t *s)
 }
 
 
+static inline void
+channel_apply_preset(synth_channel_t *c, eeprom_preset_t *p)
+{
+    if (p == NULL || c == NULL)
+        return;
+
+    ps_engine_module_oscillator_set_waveform(&c->oscillator, p->oscillator.waveform);
+    ps_engine_module_adsr_set_attack(&c->adsr, p->adsr.attack);
+    ps_engine_module_adsr_set_decay(&c->adsr, p->adsr.decay);
+    ps_engine_module_adsr_set_sustain(&c->adsr, p->adsr.sustain);
+    ps_engine_module_adsr_set_release(&c->adsr, p->adsr.release);
+}
+
+
 void
 synth_core1(synth_t *s)
 {
     hard_assert(s);
-
-    for (uint8_t i = 0; i < 2; i++) {
-        s->channels[i].oscillator_src.mod = &ps_engine_module_oscillator;
-        s->channels[i].oscillator_src.data = &s->channels[i].oscillator;
-        s->channels[i].amplifier_fltr.mod = &ps_engine_module_amplifier;
-        s->channels[i].amplifier_fltr.data = &s->channels[i].amplifier;
-        s->channels[i].adsr_fltr.mod = &ps_engine_module_adsr;
-        s->channels[i].adsr_fltr.data = &s->channels[i].adsr;
-
-        s->channels[i].voice.source = &s->channels[i].oscillator_src;
-        s->channels[i].voice.filters = &s->channels[i].amplifier_fltr;
-        s->channels[i].amplifier_fltr.next = &s->channels[i].adsr_fltr;
-
-        s->engine.channels[i].voices = &s->channels[i].voice;
-    }
-
     hard_assert(ps_engine_init(&s->engine) == PICO_OK);
 
-    ps_engine_module_oscillator_set_waveform(&s->channels[0].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE);
-    ps_engine_module_oscillator_set_waveform(&s->channels[1].oscillator, PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM_SINE);
-
-    ps_engine_module_adsr_set_attack(&s->channels[0].adsr, 20);
-    ps_engine_module_adsr_set_decay(&s->channels[0].adsr, 20);
-    ps_engine_module_adsr_set_release(&s->channels[0].adsr, 20);
-    ps_engine_module_adsr_set_sustain(&s->channels[0].adsr, 0x7f);
-
-    ps_engine_module_adsr_set_attack(&s->channels[1].adsr, 20);
-    ps_engine_module_adsr_set_decay(&s->channels[1].adsr, 20);
-    ps_engine_module_adsr_set_release(&s->channels[1].adsr, 20);
-    ps_engine_module_adsr_set_sustain(&s->channels[1].adsr, 0x7f);
+    for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
+        channel_apply_preset(&s->channels[i], &s->settings.presets[s->settings.voices[i].preset]);
 
     while (1)
         hard_assert(ps_engine_task(&s->engine) == PICO_OK);
@@ -94,14 +133,14 @@ synth_core1(synth_t *s)
 
 
 void
-channel_set_note(synth_t *s, uint8_t midi_ch, uint8_t note, uint8_t velocity)
+synth_set_note(synth_t *s, uint8_t midi_ch, uint8_t note, uint8_t velocity)
 {
     if (s == NULL)
         return;
 
     synth_channel_t *c = NULL;
     for (uint8_t i = 0; i < 2; i++) {
-        if (s->channels[i].midi_channel == midi_ch && !s->channels[i].running) {
+        if (s->settings.voices[i].midi_channel == midi_ch && !s->channels[i].running) {
             c = &s->channels[i];
             break;
         }
@@ -122,14 +161,14 @@ channel_set_note(synth_t *s, uint8_t midi_ch, uint8_t note, uint8_t velocity)
 
 
 void
-channel_unset_note(synth_t *s, uint8_t midi_ch, uint8_t note)
+synth_unset_note(synth_t *s, uint8_t midi_ch, uint8_t note)
 {
     if (s == NULL)
         return;
 
     synth_channel_t *c = NULL;
     for (uint8_t i = 0; i < 2; i++) {
-        if (s->channels[i].midi_channel == midi_ch && s->channels[i].running && s->channels[i].note == note) {
+        if (s->settings.voices[i].midi_channel == midi_ch && s->channels[i].running && s->channels[i].note == note) {
             c = &s->channels[i];
             break;
         }
@@ -144,4 +183,88 @@ channel_unset_note(synth_t *s, uint8_t midi_ch, uint8_t note)
 
     c->running = false;
     c->note = 0xff;
+}
+
+
+uint8_t
+synth_preset_get_from_midi_channel(synth_t *synth, uint8_t midi_ch)
+{
+    if (synth == NULL)
+        return 0xff;
+
+    for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
+        if (synth->settings.voices[i].midi_channel == midi_ch)
+            return synth->settings.voices[i].preset;
+
+    return 0xff;
+}
+
+
+void
+synth_preset_set_waveform(synth_t *synth, uint8_t preset, ps_engine_module_oscillator_waveform_t wf)
+{
+    if (synth == NULL || preset >= EEPROM_PRESET_COUNT)
+        return;
+
+    synth->settings.presets[preset].oscillator.waveform = wf;
+
+    for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
+        if (synth->settings.voices[i].preset == preset)
+            ps_engine_module_oscillator_set_waveform(&synth->channels[i].oscillator, wf);
+}
+
+
+void
+synth_preset_set_adsr_attack(synth_t *synth, uint8_t preset, uint8_t attack)
+{
+    if (synth == NULL || preset >= EEPROM_PRESET_COUNT)
+        return;
+
+    synth->settings.presets[preset].adsr.attack = attack;
+
+    for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
+        if (synth->settings.voices[i].preset == preset)
+            ps_engine_module_adsr_set_attack(&synth->channels[i].adsr, attack);
+}
+
+
+void
+synth_preset_set_adsr_decay(synth_t *synth, uint8_t preset, uint8_t decay)
+{
+    if (synth == NULL || preset >= EEPROM_PRESET_COUNT)
+        return;
+
+    synth->settings.presets[preset].adsr.decay = decay;
+
+    for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
+        if (synth->settings.voices[i].preset == preset)
+            ps_engine_module_adsr_set_decay(&synth->channels[i].adsr, decay);
+}
+
+
+void
+synth_preset_set_adsr_sustain(synth_t *synth, uint8_t preset, uint8_t sustain)
+{
+    if (synth == NULL || preset >= EEPROM_PRESET_COUNT)
+        return;
+
+    synth->settings.presets[preset].adsr.sustain = sustain;
+
+    for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
+        if (synth->settings.voices[i].preset == preset)
+            ps_engine_module_adsr_set_sustain(&synth->channels[i].adsr, sustain);
+}
+
+
+void
+synth_preset_set_adsr_release(synth_t *synth, uint8_t preset, uint8_t release)
+{
+    if (synth == NULL || preset >= EEPROM_PRESET_COUNT)
+        return;
+
+    synth->settings.presets[preset].adsr.release = release;
+
+    for (uint8_t i = 0; i < EEPROM_VOICE_COUNT; i++)
+        if (synth->settings.voices[i].preset == preset)
+            ps_engine_module_adsr_set_release(&synth->channels[i].adsr, release);
 }

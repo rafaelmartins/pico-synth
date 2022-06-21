@@ -12,13 +12,38 @@ pico_sdk_init()
 add_executable(pico-synth
     main.c
 
+    eeprom-types.h
+
     midi-impl.c
 
-    screens.c
-    screens.h
-
-    settings.c
-    settings.h
+    screen-main.c
+    screen-main.h
+    screen-settings.c
+    screen-settings.h
+    screen-settings-channel.c
+    screen-settings-channel.h
+    screen-settings-channel-midi.c
+    screen-settings-channel-midi.h
+    screen-settings-channel-preset.c
+    screen-settings-channel-preset.h
+    screen-settings-channels.c
+    screen-settings-channels.h
+    screen-settings-preset.c
+    screen-settings-preset.h
+    screen-settings-preset-adsr-attack.c
+    screen-settings-preset-adsr-attack.h
+    screen-settings-preset-adsr-decay.c
+    screen-settings-preset-adsr-decay.h
+    screen-settings-preset-adsr-release.c
+    screen-settings-preset-adsr-release.h
+    screen-settings-preset-adsr-sustain.c
+    screen-settings-preset-adsr-sustain.h
+    screen-settings-preset-waveform.c
+    screen-settings-preset-waveform.h
+    screen-settings-presets.c
+    screen-settings-presets.h
+    screen-splash.c
+    screen-splash.h
 
     synth.c
     synth.h

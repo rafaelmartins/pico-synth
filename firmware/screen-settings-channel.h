@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#pragma once
+
 #include <pico-synth/tui.h>
 
-
+extern const ps_tui_screen_t screen_settings_channel;
