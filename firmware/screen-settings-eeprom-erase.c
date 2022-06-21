@@ -7,7 +7,6 @@
 
 #include <hardware/watchdog.h>
 #include "screen-settings.h"
-#include "screen-settings-eeprom-error.h"
 #include "screen-settings-eeprom-updating.h"
 
 
@@ -15,10 +14,7 @@ static void
 erase_settings(ps_tui_t *tui)
 {
     ps_tui_screen_load(tui, &screen_settings_eeprom_updating);
-    if (PICO_OK != ps_tui_eeprom_erase(tui)) {
-        ps_tui_screen_load(tui, &screen_settings_eeprom_error);
-        sleep_ms(5000);
-    }
+    ps_tui_eeprom_erase(tui);
     watchdog_reboot(0, 0, 0);
 }
 
