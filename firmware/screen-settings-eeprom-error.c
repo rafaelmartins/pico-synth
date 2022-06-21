@@ -9,7 +9,7 @@
 #include "screen-settings-eeprom-error.h"
 
 static const ps_tui_screen_lines_t lines = {
-    .line3 = {"EEPROM operation", PS_TUI_OLED_HALIGN_CENTER},
+    .line3 = {"EEPROM update", PS_TUI_OLED_HALIGN_CENTER},
     .line4 = {"failed :(", PS_TUI_OLED_HALIGN_CENTER},
     .action = {
         .type = PS_TUI_SCREEN_ACTION_NEXT,

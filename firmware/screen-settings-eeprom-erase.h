@@ -9,4 +9,4 @@
 
 #include <pico-synth/tui.h>
 
-extern const ps_tui_screen_t screen_settings_eeprom_saving;
+extern const ps_tui_screen_t screen_settings_eeprom_erase;

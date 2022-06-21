@@ -28,10 +28,12 @@ add_executable(pico-synth
     screen-settings-channel-preset.h
     screen-settings-channels.c
     screen-settings-channels.h
+    screen-settings-eeprom-erase.c
+    screen-settings-eeprom-erase.h
     screen-settings-eeprom-error.c
     screen-settings-eeprom-error.h
-    screen-settings-eeprom-saving.c
-    screen-settings-eeprom-saving.h
+    screen-settings-eeprom-updating.c
+    screen-settings-eeprom-updating.h
     screen-settings-preset.c
     screen-settings-preset.h
     screen-settings-preset-adsr-attack.c
