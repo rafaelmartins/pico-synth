@@ -11,7 +11,7 @@
 #include "driver-oled.h"
 
 // FIXME: make this thread safe? is it needed?
-static char buf_selected[MAX_CHARS_PER_LINE + 1]   = "> ";
+static char buf_selected[MAX_CHARS_PER_LINE + 1]   = "\x10 ";
 static char buf_unselected[MAX_CHARS_PER_LINE + 1] = "  ";
 static char buf_line[MAX_CHARS_PER_LINE + 1];
 
@@ -240,12 +240,12 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
             v = screen->select_byte->min;
 
         if (screen->select_byte->to_string_func != NULL) {
-            char tmp[sizeof(buf_line) - 6];
+            char tmp[sizeof(buf_line) - 4];
             screen->select_byte->to_string_func(tui, v, tmp, sizeof(tmp));
-            snprintf(buf_line, sizeof(buf_line), "<< %s >>", tmp);
+            snprintf(buf_line, sizeof(buf_line), "\x11 %s \x10", tmp);
         }
         else {
-            snprintf(buf_line, sizeof(buf_line), "<< %d >>", v);
+            snprintf(buf_line, sizeof(buf_line), "\x11 %d \x10", v);
         }
         ps_tui_oled_line(tui, 4, buf_line, PS_TUI_OLED_HALIGN_CENTER);
         break;
