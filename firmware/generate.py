@@ -184,9 +184,9 @@ def dump_notes():
     for i, f in enumerate(note_frequencies):
         step = waveform_samples_per_cycle / (audio_sample_rate / f)
         yield '    {'
-        yield '        .id        = %d,' % i
-        yield '        .name      = "%s%d",' % (note_prefixes[i % 12], (i // 12) - 1)
-        yield '        .step.data = %s,' % format_hex(step * (1 << 16), 8)
+        yield '        .id   = %d,' % i
+        yield '        .name = "%s%d",' % (note_prefixes[i % 12], (i // 12) - 1)
+        yield '        .step = {%s},' % format_hex(step * (1 << 16), 8)
         yield '    },'
 
     yield '};'
@@ -241,7 +241,7 @@ def dump_adsr_times():
         step = (adsr_samples_per_cycle * 1000) / (t * audio_sample_rate)
         yield '    {'
         yield '        .description = "%s",' % desc
-        yield '        .step.data   = %s,' % format_hex(round(step * (1 << 16)), 8)
+        yield '        .step        = {%s},' % format_hex(round(step * (1 << 16)), 8)
         yield '    },'
 
     yield '};'
