@@ -244,10 +244,14 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
         if (screen->select_byte->to_string_func != NULL) {
             char tmp[sizeof(buf_line) - 4];
             screen->select_byte->to_string_func(tui, v, tmp, sizeof(tmp));
-            snprintf(buf_line, sizeof(buf_line), "\x11 %s \x10", tmp);
+            snprintf(buf_line, sizeof(buf_line), "%c %s %c",
+                     screen->select_byte->setter_func == NULL ? ' ' : 0x11, tmp,
+                     screen->select_byte->setter_func == NULL ? ' ' : 0x10);
         }
         else {
-            snprintf(buf_line, sizeof(buf_line), "\x11 %d \x10", v);
+            snprintf(buf_line, sizeof(buf_line), "%c %d %c",
+                     screen->select_byte->setter_func == NULL ? ' ' : 0x11, v,
+                     screen->select_byte->setter_func == NULL ? ' ' : 0x10);
         }
         ps_tui_oled_line(tui, 4, buf_line, PS_TUI_OLED_HALIGN_CENTER);
         break;
