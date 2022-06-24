@@ -18,6 +18,7 @@ target_sources(pico_synth_tui INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/driver-oled.h
 
     ${CMAKE_CURRENT_LIST_DIR}/screen.c
+    ${CMAKE_CURRENT_LIST_DIR}/screen.h
 )
 
 target_include_directories(pico_synth_tui INTERFACE

@@ -7,8 +7,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <hardware/timer.h>
 #include "driver-ec11.h"
 #include "driver-oled.h"
+#include "screen.h"
 
 // FIXME: make this thread safe? is it needed?
 static char buf_selected[MAX_CHARS_PER_LINE + 1]   = "\x10 ";
@@ -256,6 +258,8 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
         return rv;
 
     tui->_current_screen = screen;
+    tui->_current_screen_us = time_us_64();
+
     return PICO_OK;
 }
 
@@ -263,6 +267,7 @@ ps_tui_screen_load(ps_tui_t *tui, const ps_tui_screen_t *screen)
 int
 ps_tui_screen_reload(ps_tui_t *tui, const ps_tui_screen_t *screen)
 {
+    hard_assert(tui);
     if (screen == NULL)
         return PICO_OK;
 
@@ -270,4 +275,18 @@ ps_tui_screen_reload(ps_tui_t *tui, const ps_tui_screen_t *screen)
         return ps_tui_screen_load(tui, tui->_current_screen);
 
     return PICO_OK;
+}
+
+
+void
+screen_task(ps_tui_t *tui)
+{
+    hard_assert(tui);
+    if (tui->_current_screen == NULL || tui->_current_screen->auto_action.action.type == 0)
+        return;
+
+    if (time_us_64() - tui->_current_screen_us < tui->_current_screen->auto_action.delay_ms * 1000)
+        return;
+
+    run_action(tui, &tui->_current_screen->auto_action.action);
 }

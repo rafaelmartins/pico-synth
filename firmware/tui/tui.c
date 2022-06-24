@@ -11,6 +11,7 @@
 #include "driver-ec11.h"
 #include "driver-eeprom.h"
 #include "driver-oled.h"
+#include "screen.h"
 
 
 int
@@ -41,6 +42,7 @@ ps_tui_task(ps_tui_t *tui)
     hard_assert(tui);
 
     ec11_task(tui);
+    screen_task(tui);
 
     return PICO_OK;
 }

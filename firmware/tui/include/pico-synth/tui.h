@@ -84,6 +84,7 @@ typedef struct {
     uint8_t _selected;
     uint8_t _selected_line;
     const struct ps_tui_screen *_current_screen;
+    uint64_t _current_screen_us;
 } ps_tui_t;
 
 typedef bool (*ps_tui_screen_line_func_t) (ps_tui_t *tui, char *buf, size_t buflen);
@@ -164,6 +165,10 @@ typedef struct ps_tui_screen {
         const ps_tui_screen_lines_t *lines;
         const ps_tui_screen_select_byte_t *select_byte;
     };
+    struct {
+        uint32_t delay_ms;
+        ps_tui_screen_action_t action;
+    } auto_action;
 } ps_tui_screen_t;
 
 int ps_tui_init(ps_tui_t *tui);
