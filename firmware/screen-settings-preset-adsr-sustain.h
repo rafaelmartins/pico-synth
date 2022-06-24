@@ -10,3 +10,4 @@
 #include <pico-synth/tui.h>
 
 extern const ps_tui_screen_t screen_settings_preset_adsr_sustain;
+extern const ps_tui_screen_t screen_settings_preset_adsr_sustain_notif;

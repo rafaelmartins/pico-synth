@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include "midi-notif.h"
 #include "synth.h"
 #include "screen-settings-preset.h"
 #include "screen-settings-preset-adsr-attack.h"
@@ -34,8 +35,11 @@ setter(ps_tui_t *tui, uint8_t b)
 }
 
 
+#define TITLE "ADSR Attack"
+#define _MAX 0xff
+
 static const ps_tui_screen_select_byte_t select_byte = {
-    .title = "ADSR Attack",
+    .title = TITLE,
     .to_string_func = to_string,
     .getter_func = getter,
     .setter_func = setter,
@@ -43,10 +47,29 @@ static const ps_tui_screen_select_byte_t select_byte = {
         .type = PS_TUI_SCREEN_ACTION_NEXT,
         .next = &screen_settings_preset,
     },
-    .max = 0xff,
+    .max = _MAX,
 };
 
 const ps_tui_screen_t screen_settings_preset_adsr_attack = {
     .type = PS_TUI_SCREEN_SELECT_BYTE,
     .select_byte = &select_byte,
+};
+
+static const ps_tui_screen_select_byte_t select_byte_notif = {
+    .title = TITLE,
+    .to_string_func = to_string,
+    .getter_func = getter,
+    .max = _MAX,
+};
+
+const ps_tui_screen_t screen_settings_preset_adsr_attack_notif = {
+    .type = PS_TUI_SCREEN_SELECT_BYTE,
+    .select_byte = &select_byte_notif,
+    .auto_action = {
+        .delay_ms = MIDI_NOTIFICATIONS_DELAY_MS,
+        .action = {
+            .type = PS_TUI_SCREEN_ACTION_FUNC,
+            .func = midi_notif_action,
+        },
+    }
 };

@@ -9,5 +9,7 @@
 
 #include <pico-synth/tui.h>
 
-extern const ps_tui_screen_t screen_settings_preset_adsr_attack;
-extern const ps_tui_screen_t screen_settings_preset_adsr_attack_notif;
+#define MIDI_NOTIFICATIONS_DELAY_MS 2000
+
+void midi_notif_action(ps_tui_t *tui);
+void midi_notif_load_screen(ps_tui_t *tui, const ps_tui_screen_t *screen, uint8_t preset);

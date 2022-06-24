@@ -53,6 +53,8 @@ typedef struct {
     uint8_t _current_voice;
     uint8_t _current_preset;
     bool _preset_from_channel;
+    const ps_tui_screen_t *_midi_notifications_screen;
+    uint8_t _midi_notifications_preset;
 } synth_t;
 
 void synth_init(synth_t *s);

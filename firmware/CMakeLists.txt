@@ -15,6 +15,8 @@ add_executable(pico-synth
     eeprom-types.h
 
     midi-impl.c
+    midi-notif.c
+    midi-notif.h
 
     screen-main.c
     screen-main.h
