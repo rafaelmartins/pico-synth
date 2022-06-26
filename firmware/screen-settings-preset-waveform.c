@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include "midi-notif.h"
 #include "synth.h"
 #include "screen-settings-preset.h"
 #include "screen-settings-preset-waveform.h"
@@ -57,8 +58,11 @@ setter(ps_tui_t *tui, uint8_t b)
 }
 
 
+#define TITLE "Waveform"
+#define _MAX PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM__LAST - 1
+
 static const ps_tui_screen_select_byte_t select_byte = {
-    .title = "Waveform",
+    .title = TITLE,
     .to_string_func = to_string,
     .getter_func = getter,
     .setter_func = setter,
@@ -66,10 +70,29 @@ static const ps_tui_screen_select_byte_t select_byte = {
         .type = PS_TUI_SCREEN_ACTION_NEXT,
         .next = &screen_settings_preset,
     },
-    .max = PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM__LAST - 1,
+    .max = _MAX,
 };
 
 const ps_tui_screen_t screen_settings_preset_waveform = {
     .type = PS_TUI_SCREEN_SELECT_BYTE,
     .select_byte = &select_byte,
+};
+
+static const ps_tui_screen_select_byte_t select_byte_notif = {
+    .title = TITLE,
+    .to_string_func = to_string,
+    .getter_func = getter,
+    .max = _MAX,
+};
+
+const ps_tui_screen_t screen_settings_preset_waveform_notif = {
+    .type = PS_TUI_SCREEN_SELECT_BYTE,
+    .select_byte = &select_byte_notif,
+    .auto_action = {
+        .delay_ms = MIDI_NOTIFICATIONS_DELAY_MS,
+        .action = {
+            .type = PS_TUI_SCREEN_ACTION_FUNC,
+            .func = midi_notif_action,
+        },
+    }
 };

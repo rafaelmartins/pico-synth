@@ -10,6 +10,7 @@
 #include "screen-settings-preset-adsr-decay.h"
 #include "screen-settings-preset-adsr-release.h"
 #include "screen-settings-preset-adsr-sustain.h"
+#include "screen-settings-preset-waveform.h"
 #include "midi-notif.h"
 #include "synth.h"
 
@@ -41,6 +42,11 @@ ps_midi_message_cb(const ps_midi_message_t *msg, void *ctx_data)
             uint8_t p = synth_preset_get_from_midi_channel(synth, msg->channel.channel);
 
             switch (msg->channel.data[0]) {
+            case 0x03: // waveform
+                synth_preset_set_waveform(synth, p, msg->channel.data[1] / (0x80 / PS_ENGINE_MODULE_OSCILLATOR_WAVEFORM__LAST));
+                midi_notif_load_screen(&synth->tui, &screen_settings_preset_waveform_notif, p);
+                break;
+
             case 0x48: // release
                 synth_preset_set_adsr_release(synth, p, msg->channel.data[1] * 2);
                 midi_notif_load_screen(&synth->tui, &screen_settings_preset_adsr_release_notif, p);
