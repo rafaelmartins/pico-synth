@@ -1,3 +1,4 @@
 (fp_lib_table
-  (lib (name MCU_RaspberryPi_and_Boards)(type KiCad)(uri ${KIPRJMOD}/libraries/MCU_RaspberryPi_and_Boards.pretty)(options "")(descr ""))
+  (lib (name "MCU_RaspberryPi_and_Boards")(type "KiCad")(uri "${KIPRJMOD}/lib/MCU_RaspberryPi_and_Boards.pretty")(options "")(descr "Raspberry Pi Pico and RP2040"))
+  (lib (name "Connector_JST_with_PinSocket")(type "KiCad")(uri "${KIPRJMOD}/lib/Connector_JST_with_PinSocket.pretty")(options "")(descr "JST-XH connectors with pin socket silkscreen"))
 )

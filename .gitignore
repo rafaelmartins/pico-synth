@@ -10,6 +10,7 @@ CMakeLists.txt.user
 *.bck
 *.kicad_pcb-bak
 *~
+\#auto_saved_files\#
 _autosave-*
 *.tmp
 *.dsn

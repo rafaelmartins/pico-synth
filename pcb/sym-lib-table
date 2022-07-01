@@ -1,3 +1,4 @@
 (sym_lib_table
-  (lib (name "MCU_RaspberryPi_and_Boards")(type "KiCad")(uri "${KIPRJMOD}/libraries/MCU_RaspberryPi_and_Boards.kicad_sym")(options "")(descr ""))
+  (lib (name "MCU_RaspberryPi_and_Boards")(type "KiCad")(uri "${KIPRJMOD}/lib/MCU_RaspberryPi_and_Boards.kicad_sym")(options "")(descr "Raspberry Pi Pico and RP2040"))
+  (lib (name "TLV272")(type "KiCad")(uri "${KIPRJMOD}/lib/TLV272.kicad_sym")(options "")(descr "TLV272 Operational Amplifier"))
 )
