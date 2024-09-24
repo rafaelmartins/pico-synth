@@ -72,6 +72,7 @@ target_compile_definitions(tinyusb_device INTERFACE
 )
 
 pico_enable_stdio_uart(pico-synth 1)
+pico_add_extra_outputs(pico-synth)
 
 add_subdirectory(engine)
 add_subdirectory(midi)
