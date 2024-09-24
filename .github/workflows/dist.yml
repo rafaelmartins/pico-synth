@@ -51,6 +51,7 @@ jobs:
             --file="xpack-arm-none-eabi-gcc-${XPACK_ARM_TOOLCHAIN_VERSION}-linux-x64.tar.gz"
 
           echo "${{ github.workspace }}/xpack-arm-none-eabi-gcc-${XPACK_ARM_TOOLCHAIN_VERSION}/bin" >> $GITHUB_PATH
+          echo "PICO_SDK_PATH=${{ github.workspace }}/pico-sdk" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
@@ -61,7 +62,7 @@ jobs:
           cmake \
             -B ${{ github.workspace }}/build \
             -D CMAKE_BUILD_TYPE=Release \
-            -S ${{ github.workspace }}/pico-synth \
+            -S ${{ github.workspace }}/pico-synth/firmware \
             -G Ninja
 
           cmake \
