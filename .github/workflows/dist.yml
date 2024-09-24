@@ -1,0 +1,73 @@
+name: dist
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: main
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  XPACK_ARM_TOOLCHAIN_VERSION: "13.3.1-1.1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: pico-synth
+          fetch-depth: 0
+
+      - uses: actions/checkout@v4
+        with:
+          repository: raspberrypi/pico-sdk
+          ref: 1.5.1
+          submodules: true
+          path: pico-sdk
+
+      - name: Install arm-none-eabi toolchain
+        run: |
+          wget \
+            "https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v${XPACK_ARM_TOOLCHAIN_VERSION}/xpack-arm-none-eabi-gcc-${XPACK_ARM_TOOLCHAIN_VERSION}-linux-x64.tar.gz"{,.sha}
+
+          sha256sum \
+            --check \
+            "xpack-arm-none-eabi-gcc-${XPACK_ARM_TOOLCHAIN_VERSION}-linux-x64.tar.gz.sha"
+
+          tar \
+            --extract \
+            --verbose \
+            --file="xpack-arm-none-eabi-gcc-${XPACK_ARM_TOOLCHAIN_VERSION}-linux-x64.tar.gz"
+
+          echo "${{ github.workspace }}/xpack-arm-none-eabi-gcc-${XPACK_ARM_TOOLCHAIN_VERSION}/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          sudo apt install -y --no-install-recommends ninja-build
+
+      - name: Build
+        run: |
+          cmake \
+            -B ${{ github.workspace }}/build \
+            -D CMAKE_BUILD_TYPE=Release \
+            -S ${{ github.workspace }}/pico-synth \
+            -G Ninja
+
+          cmake \
+            --build ${{ github.workspace }}/build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: build/pico-synth.*
